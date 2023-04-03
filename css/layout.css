@@ -1,0 +1,109 @@
+
+label.error {
+		color: red;
+		font-size: 16px;
+		font-weight: normal;
+		line-height: 1.4;
+		margin-top: 0.5em;
+		width: 100%;
+		float: none;
+	}
+	@media screen and (orientation: portrait) {
+		label.error {
+			margin-left: 0;
+			display: block;
+		}
+	}
+	@media screen and (orientation: landscape) {
+		label.error {
+			display: inline-block;
+			margin-left: 22%;
+		}
+	}
+	em {
+		color: red;
+		font-weight: bold;
+		padding-right: .25em;
+	}
+
+.menu {
+
+	width: 25%;
+	height : 100px;
+	color: red;
+	border-style : solid;
+	border-radius: 15px;
+	
+}
+
+.menu:hover {
+		background-color: yellow;
+}
+
+#link-update {
+	background: url('/images/edit.png') no-repeat 5px center;
+	background-size: 18px 18px;
+	background-position: left;
+	padding-left: 20px;;
+}
+
+#link-delete {
+	background: url('/images/error_28.png') no-repeat 5px center;
+	background-size: 18px 18px;
+	background-position: left;
+	padding-left: 20px;;
+}
+
+#refresh-all {
+	background: url('/images/refresh.png') no-repeat 5px center;
+	background-size: 18px 18px;
+	background-position: left;
+	padding-left: 20px;;
+}
+
+#management-control {
+	text-align: right !important;
+	margin-right: 10px;
+	margin-bottom: 15px;
+}
+
+#management-control a {
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.menu span {
+	display : inline-block;
+	width: 100%;
+	height: 20px;
+	 cursor:pointer;
+     color:blue;
+     text-decoration:underline;
+}
+
+#container {
+	text-align: center;
+	margin: auto;
+}
+
+
+.ui-block-a, .ui-block-b{
+	
+	height: 50px;
+	line-height: 50px;
+	  min-height: 50px;
+	width: auto;
+}
+
+.ui-icon-booking {
+	background-image: url("/images/edit.png");
+	 background-repeat: no-repeat;
+  background-position: 0% 50%;
+   
+}
+
+.ui-icon-riwayat {
+	background-image: url("/images/time.png");
+	 background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
