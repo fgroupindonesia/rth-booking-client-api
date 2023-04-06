@@ -9,9 +9,13 @@ class User extends CI_Controller {
 		$this->load->model('PictureModel');
 		$this->load->model('HealthModel');
 		$this->load->model('EmailModel');
+		$this->load->model('FamilyUserModel');
 		
-		// turn this off if the site is ALIVE 
-		$this->EmailModel->setDebugMode(true);
+		// turn this TRUE if the site is in text output 
+		$this->EmailModel->setDebugMode(false);
+		
+		// turn this TRUE if the site can SEND EMAIL
+		$this->EmailModel->setEmailMode(false);
 	}
 	
 	public function test(){
@@ -38,10 +42,21 @@ class User extends CI_Controller {
 	
 	public function register(){
 		
-		$email 			= $this->input->post('peserta_baru_email');
 		
+		$email 			= $this->input->post('email');
+		$full_name 		= $this->input->post('full_name');
+		
+		if(isset($email) && !empty($email) ){
 		// user name dan pass dari sistem saja
-		$username 		= $this->getEmail($email);
+			$username 		= $this->getEmail($email);
+		} elseif(isset($full_name)){
+			// untuk yg non username non email
+			// kita generate dari namanya
+			
+			$username = str_replace(" ","",$full_name);
+			$username = strtolower($username);
+		}
+		
 		$pass 			= $this->generateToken(7);
 		
 		// we also generate 25 digit of token
@@ -49,15 +64,15 @@ class User extends CI_Controller {
 		$token 			= $this->generateToken(25);
 		
 		
-		$home_address 	= $this->input->post('peserta_baru_alamat');
-		$contact 		= $this->input->post('peserta_baru_nomorhp');
-		$full_name 		= $this->input->post('peserta_baru_nama');
+		$home_address 	= $this->input->post('home_address');
+		$contact 		= $this->input->post('contact');
+		
 		$alive 			= 0; 
 		// ALIVE 0 is OFFLINE, ALIVE 1 is ONLINE
 		$membership 	= 0; 
 		// MEMBERSHIP 0 is patient, MEMBERSHIP 1 is VIP, 
 		// MEMBERSHIP 2 is admin
-		$gender			=  $this->input->post('peserta_baru_kelamin');
+		$gender			=  $this->input->post('gender');
 		
 		$propic			= 'default.png';
 		
@@ -73,26 +88,34 @@ class User extends CI_Controller {
 	 
 		 $endRespond = $this->UserModel->add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propic, $token);
 		 
+		 $rel_conn = $this->input->post('rel_connection');
+		 $username_incharge = $this->input->post('username_incharge');
+		 
+		 // if this date is coming from family members
+		 // so add to the specific table accordingly
+		 if(isset($rel_conn)){
+			 $endRespond = $this->FamilyUserModel->add($full_name, $username_incharge, $rel_conn);
+		 }
 		 
 		 if($endRespond['status'] = 'valid'){
-			 $keluhan 		= $this->input->post('kesehatan_umum_keluhan');
-			 $smoking 		= $this->input->post('kesehatan_umum_merokok');
-			 $rawat_inap 	= $this->input->post('kesehatan_umum_pernahinap');
-			 $obat_bius 	= $this->input->post('kesehatan_umum_pernahbius');
-			 $tbc 			= $this->input->post('kesehatan_umum_pernahdivonistbc');
-			 $kanker 		= $this->input->post('kesehatan_umum_pernahdivoniskanker');
-			 $jantung 		= $this->input->post('kesehatan_umum_pernahdivonisjantung');
-			 $stroke 		= $this->input->post('kesehatan_umum_pernahdivonisstroke');
-			 $anjurandok 	= $this->input->post('kesehatan_umum_pernahanjuran');
+			 $keluhan 		= $this->input->post('keluhan');
+			 $smoking 		= $this->input->post('merokok');
+			 $rawat_inap 	= $this->input->post('pernahinap');
+			 $obat_bius 	= $this->input->post('pernahbius');
+			 $tbc 			= $this->input->post('pernahdivonistbc');
+			 $kanker 		= $this->input->post('pernahdivoniskanker');
+			 $jantung 		= $this->input->post('pernahdivonisjantung');
+			 $stroke 		= $this->input->post('pernahdivonisstroke');
+			 $anjurandok 	= $this->input->post('pernahanjuran');
 			
 			 $this->HealthModel->add_common($keluhan, $smoking, $rawat_inap,
 			 $obat_bius, $tbc, $kanker, $jantung, $stroke, $anjurandok, $username);
 			 
-			 $ritual 		= $this->input->post('kesehatan_khusus_pernahritual');
-			 $tenaga 		= $this->input->post('kesehatan_khusus_pernahtd');
-			 $mimpi 		= $this->input->post('kesehatan_khusus_pernahmimpi');
-			 $kunjungan 	= $this->input->post('kesehatan_khusus_pernahkunjungan');
-			 $ghaib 		= $this->input->post('kesehatan_khusus_pernahghaib');
+			 $ritual 		= $this->input->post('pernahritual');
+			 $tenaga 		= $this->input->post('pernahtd');
+			 $mimpi 		= $this->input->post('pernahmimpi');
+			 $kunjungan 	= $this->input->post('pernahkunjungan');
+			 $ghaib 		= $this->input->post('pernahghaib');
 			 
 			 $this->HealthModel->add_special($ritual, $tenaga, $mimpi,
 			 $kunjungan, $ghaib, $username);
@@ -181,21 +204,6 @@ class User extends CI_Controller {
 		$full_name 	= $this->input->post('full_name');
 		$gender 	= $this->input->post('gender');
 		$member 	= $this->input->post('membership');
-		
-		// this is coming from Web
-		if(!isset($email)){
-			$id 		= $this->input->post('profil_id');
-			$status 	= $this->input->post('profil_status');
-			$username 	= $this->input->post('profil_username');
-			$pass 		= $this->input->post('profil_pass');
-			$email 		= $this->input->post('profil_email');
-			$home_address 	= $this->input->post('profil_home_address');
-			$contact 	= $this->input->post('profil_contact');
-			$full_name 	= $this->input->post('profil_full_name');
-			$gender 	= $this->input->post('profil_gender');
-			$member 	= $this->input->post('profil_membership');
-			
-		}
 		
 		if(!isset($status)){
 			// given for default

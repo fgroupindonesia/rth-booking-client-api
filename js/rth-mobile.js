@@ -3,6 +3,12 @@ var fullname_sembunyi = "";
 var jadwal_sembunyi = "";
 var gender_sembunyi = "";
 var month_year_sembunyi = "";
+var hubungan_sembunyi = "";
+var modePendaftaran = "";
+var kiriman = "";
+var pakaiEmail = true;
+var anggotaNa = false;
+var jumlahAnggota = 0;
 
 
 $(document).ready(function(){
@@ -15,27 +21,70 @@ $(document).ready(function(){
 	
 	clickEventFormKesehatan();
 	clickEventAwal();
+	clickEventAllAnggota();
 	clickEventAllBooking();
 	clickEventCancelBooking();
+	clickEventDeleteAnggota();
 	clickEventPilihJadwalTerapi();
 	clickEventPilihTanggal();
 	clickEventBukaProfil();
-	
-	aktifkanTombolNext();
+	clickEventDaftarkanAnggota();
+	clickEventDaftarkanTunggal();
+	clickEventTanpaEmail();
 	
 	
 	setTimeout(nextPage1, 3000);
 	
-	formRegistrationValidation();
+	// false because not for anggota
+	// anggota doesnt need email verification
+	formRegistrationValidation(false);
 	formLoginValidation();
 	formResetPassValidation();
 	formProfilValidation();
 	
 	aktifkanLinkKontakAdmin();
 	
+	aktifkanPilihanSiapaTerapi();
+	
 	pilihJam();
 	
 });
+
+function clearFormRegistrasi(){
+	
+	$("#form-registrasi").each(function(){this.reset();});
+	
+}
+
+function clearFormProfil(){
+	
+	$("#form-profil").each(function(){this.reset();});
+	
+}
+
+
+function clearFormLogin(){
+	
+	$("#form-login").each(function(){this.reset();});
+	
+}
+
+function aktifkanPilihanSiapaTerapi(){
+	
+	
+	$("#link-pilih-anggota").click(function() {
+	
+		var namaUser = $('#sembunyi-username').text();
+		
+		kiriman = {};
+		kiriman.username_incharge = namaUser;
+		
+		// this will eventually check how many members anggota
+		// to show the select (option)
+		grabDataJumlahAnggotaServer();
+	
+	});
+}
 
 function aktifkanLinkKontakAdmin(){
 	
@@ -48,7 +97,7 @@ function aktifkanLinkKontakAdmin(){
 	
 }
 
-var kiriman = "";
+
 
 function clickEventPilihTanggal(){
 	
@@ -71,6 +120,32 @@ function clickEventPilihTanggal(){
 	
 }
 
+function apakahMuncul (namaID){
+	var nama = "#" + namaID;
+	return $(nama).is(":hidden");
+}
+
+function clickEventTanpaEmail(){
+	
+	 $(document).on("change", "#peserta_baru_tanpa_email", function () {
+     
+	 //alert('a');
+	
+			if(pakaiEmail){
+				sembunyi('peserta_baru_bagian_email');
+				pakaiEmail = false;
+			}else{
+				pakaiEmail = true;
+				tampilin('peserta_baru_bagian_email');
+			}
+		
+		
+		//alert('b');
+	});
+	
+	
+}
+
 function clickEventPilihJadwalTerapi(){
 	
 	
@@ -80,6 +155,40 @@ function clickEventPilihJadwalTerapi(){
 		
 		
 		$.mobile.changePage("#page-pilih-jam");
+		
+		
+	});
+	
+	
+}
+
+
+function refreshDataAnggotaTable(){
+	
+	// clear the div
+	$('#anggota-table-head').nextAll('div').remove();
+	
+	tampilin('anggota-loading');
+	tampilin('anggota-table-container');
+	sembunyi('warning-anggota');
+		
+	// grab after 3 seconds
+	setTimeout(	grabDataAnggotaServer, 3000);
+
+	
+}
+
+function clickEventAllAnggota(){
+	
+	$("#link-page-all-anggota").click(function() {
+	
+		kiriman = {
+			username_incharge : username_sembunyi
+		};
+	
+		refreshDataAnggotaTable();
+		
+		$.mobile.changePage("#page-semua-anggota");
 		
 		
 	});
@@ -121,6 +230,57 @@ function clickEventBukaProfil(){
 		refreshDataProfil();
 		
 		$.mobile.changePage("#page-profil-anda");
+		
+		
+	});
+	
+	
+}
+
+function aktifkanModeAnggota(){
+	// munculkan hubungan keluarga
+	// dan checkbox matikan email
+	tampilin('hubungan-peserta');
+	tampilin('hubungan-tanpa-email');
+	
+	modePendaftaran = "anggota";
+	
+}
+
+function aktifkanModeTunggal(){
+	
+	sembunyi('hubungan-peserta');
+	sembunyi('hubungan-tanpa-email');
+	
+	modePendaftaran = "tunggal";
+	
+}
+
+
+function clickEventDaftarkanAnggota(){
+	//alert('lkii');
+	
+	$("#link-peserta-baru-tunggal").click(function() {
+	
+		aktifkanModeTunggal();
+		$.mobile.changePage("#page-peserta-baru");
+		
+		
+	});
+	
+	
+}
+
+function clickEventDaftarkanTunggal(){
+	//alert('lkii');
+	
+	$("#link-daftar-anggota").click(function() {
+	
+		// validationnya harus true untuk anggota
+		formRegistrationValidation(true);
+		aktifkanModeAnggota();
+		
+		$.mobile.changePage("#page-peserta-baru");
 		
 		
 	});
@@ -182,6 +342,72 @@ function refreshDataTable(){
 function aktifinTombolJam(dataJSON){
 	
 	
+	
+}
+
+function opsiTerapiBersamaAnggota(tampilkan){
+	
+	$('#pilih_anggota_siapa').selectmenu();
+	
+	if(!tampilkan){
+		$("#pilih_anggota_siapa option[value='saya-bersama-anggota']").remove();
+		$("#pilih_anggota_siapa option[value='anggota-saja']").remove();
+	}else{
+		
+		// will be added only if the select option doesnt have earlier
+		var isianOpsi = $('#pilih_anggota_siapa option').length;
+		
+		if(isianOpsi==1){
+			var btn1 = "<option value='anggota-saja'>Anggota saja tanpa Saya</option";
+			var btn2 = "<option value='saya-bersama-anggota'>Saya bersama anggota</option";
+			$('#pilih_anggota_siapa').append(btn1); 
+			$('#pilih_anggota_siapa').append(btn2); 
+		}
+	}
+	
+	$('#pilih_anggota_siapa').selectmenu('refresh', true);
+	
+}
+
+function grabDataJumlahAnggotaServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/family/all',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						// we set the number of family
+						var n = JSON.stringify(result);
+						var dataJSON = JSON.parse(n);
+						jumlahAnggota = dataJSON.multi_data.length;
+						
+						if(jumlahAnggota>0){
+							// sediakan select option
+							opsiTerapiBersamaAnggota(true);
+						}else {
+							// lenyapkan select option
+							opsiTerapiBersamaAnggota(false);
+						}
+						
+					}else{
+						// lenyapkan select option
+						opsiTerapiBersamaAnggota(false);
+					}
+					
+					$.mobile.changePage("#page-pilih-anggota");
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
 	
 }
 
@@ -284,8 +510,78 @@ function grabDataServer(){
 	
 }
 
+
+function grabDataAnggotaServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/family/all',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						extractDataAnggotaTable(result);
+						
+					}else{
+						sembunyi('anggota-table-container');
+						tampilin('warning-anggota');
+					}
+					
+						sembunyi('anggota-loading');
+					
+					
+					//console.log(result);
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
 function visitWhatsapCancel(){
 	window.parent.location.href = goToWhatsappCancel(kiriman);
+}
+
+function deleteDataAnggotaServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/family/delete',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						$.mobile.changePage("#page-anggota-delete-success");
+						
+						$('#anggota-fullname').text(kiriman.full_name);
+						
+						setTimeout(backToMenuAksi, 3000);
+						
+					}else{
+						// if error
+					console.log('error for delete anggota!\n' + result);	
+					
+					}
+					
+					
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
 }
 
 function updateDataServer(){
@@ -418,7 +714,7 @@ function extractDataProfil(dataCome){
 	$('#profil_full_name').val(isiNa.full_name);
 	$('#profil_fullname_span').text(isiNa.full_name);
 	
-	$('#profil_date_created').text(isiNa.created_date);
+	$('#profil_date_created').text(konversiAsHuman(isiNa.created_date));
 	
 	// this is hidden
 	$('#profil_id').val(isiNa.id);
@@ -494,6 +790,99 @@ function extractDataToTable(dataCome){
 	}
 	
 }
+
+function konversiAsHubungan(nomerHub){
+	
+	/* as defined in UI
+	
+		<option value="1">Ayah saya</option>
+		<option value="2">Ibu saya</option>
+		<option value="3">Istri saya</option>
+		<option value="4">Suami saya</option>
+		<option value="5">Anak saya</option>
+		<option value="6">Saudara Kandung saya</option>
+		<option value="7">Saudara Angkat saya</option>
+		<option value="8">Keluarga Jauh saya</option>
+		<option value="9">Keluarga Dekat saya</option>
+		<option value="10">Tetangga saya</option>
+	
+	*/
+	
+	var textHasil  = '';
+	
+	if(nomerHub == 1){
+		textHasil = "Ayah saya";
+	}else if(nomerHub == 2){
+		textHasil = "Ibu saya";
+	}else if(nomerHub == 3){
+		textHasil = "Istri saya";
+	}else if(nomerHub == 4){
+		textHasil = "Suami saya";
+	}else if(nomerHub == 5){
+		textHasil = "Anak saya";
+	}else if(nomerHub == 6){
+		textHasil = "Saudara Kandung saya";
+	}else if(nomerHub == 7){
+		textHasil = "Saudara Angkat saya";
+	}else if(nomerHub == 8){
+		textHasil = "Keluarga Jauh saya";
+	}else if(nomerHub == 9){
+		textHasil = "Keluarga Dekat saya";
+	}else if(nomerHub == 10){
+		textHasil = "Tetangga saya";
+	} 
+	
+	return textHasil;
+	
+	
+}
+
+function extractDataAnggotaTable(dataCome){
+	
+	var n = JSON.stringify(dataCome);
+    var data = JSON.parse(n); // Try to parse the response as JSON
+	
+	var isiNa = data.multi_data;
+	var p = 0;
+	for(p = 0; p < isiNa.length; p++){
+		//console.log(isiNa[p]);
+		/*
+		CREATING NEW DIV BELOW THIS ONE
+		<div class="ui-grid-c" id="anggota-table-head">
+			<div class="ui-block-a"><b>TANGGAL DAFTAR</b></div>
+			<div class="ui-block-b"><b>FULLNAME</b></div>
+			<div class="ui-block-c"><b>HUBUNGAN</b></div>
+			<div class="ui-block-d"><b> -- </b></div>
+		</div>
+		
+		*/
+		var encloser1a = "<div class='ui-grid-c data-table-cell'>";
+		var encloser1b = "</div>";
+		
+		var tglManusiawi = konversiAsHuman(isiNa[p].created_date);
+		
+		var cdate = "<div class='ui-block-a anggota-created-date'>" + tglManusiawi + "</div>";
+		
+		var fname = "<div class='ui-block-b anggota-fullname'>" + isiNa[p].full_name + "</div>";
+		
+		var hubunganNa = konversiAsHubungan(isiNa[p].rel_connection);
+		
+		var hub = "<div class='ui-block-c anggota-hubungan'>" + hubunganNa + "</div>";
+		
+		var nomerID = isiNa[p].id;
+		
+		var btn = "<input type='button' anggota-id='"+ nomerID +"' value='Delete' class='anggota-delete' data-inline='true' />";
+		
+		var hapus = "<div class='ui-block-d'>" + btn + "</div>";
+		
+		var combined = encloser1a + cdate + fname + hub + hapus + encloser1b;
+		
+		$(combined).insertAfter("#anggota-table-head");
+		
+	}
+	
+}
+
 
 function extractTreatment(dataObject){
 	
@@ -779,6 +1168,9 @@ function formLoginValidation(){
 						fullname_sembunyi = dataJSON.full_name;
 						gender_sembunyi = dataJSON.gender;
 					
+						// clearup
+						clearFormLogin();
+					
 					}else{
 						$.mobile.changePage("#page-login-failed");
 					}
@@ -795,6 +1187,67 @@ function formLoginValidation(){
 		}
     });
 	
+	
+}
+
+function remakeDataFormPesertaBaru(untukAnggota){
+	
+	kiriman = {};
+	
+	if(untukAnggota){
+		
+		// pakai hubungan keluarga
+		// dan kosongkan email
+		kiriman.email = '';
+		kiriman.username_incharge = $('#sembunyi-username').text();
+		
+		hubungan_sembunyi = $('#peserta_baru_hubungan option:selected').text();
+		kiriman.rel_connection = $('#peserta_baru_hubungan').val();
+		
+	}else{
+		kiriman.email = $('#peserta_baru_email').val();
+		hubungan_sembunyi = "";
+	}
+	
+		kiriman.home_address = $('#peserta_baru_alamat').val();
+		kiriman.contact = $('#peserta_baru_nomorhp').val();
+		kiriman.gender = $('#peserta_baru_kelamin').val();
+		kiriman.full_name = $('#peserta_baru_nama').val();
+		
+		kiriman.keluhan = $('#kesehatan_umum_keluhan').val();
+		kiriman.merokok = $('#kesehatan_umum_merokok').val();
+		kiriman.pernahinap = $('#kesehatan_umum_pernahinap').val();
+		kiriman.pernahbius = $('#kesehatan_umum_pernahbius').val();
+		kiriman.pernahdivonistbc = $('#kesehatan_umum_pernahdivonistbc').val();
+		kiriman.pernahdivoniskanker = $('#kesehatan_umum_pernahdivoniskanker').val();
+		kiriman.pernahdivonisjantung = $('#kesehatan_umum_pernahdivonisjantung').val();
+		kiriman.pernahdivonisstroke = $('#kesehatan_umum_pernahdivonisstroke').val();
+		kiriman.pernahanjuran = $('#kesehatan_umum_pernahanjuran').val();
+		
+		kiriman.pernahritual = $('#kesehatan_khusus_pernahritual').val();
+		kiriman.pernahtd = $('#kesehatan_khusus_pernahtd').val();
+		kiriman.pernahmimpi = $('#kesehatan_khusus_pernahmimpi').val();
+		kiriman.pernahkunjungan = $('#kesehatan_khusus_pernahkunjungan').val();
+		kiriman.pernahghaib = $('#kesehatan_khusus_pernahghaib').val();
+		
+	return kiriman;
+}
+
+function remakeDataFormProfil(){
+	
+	kiriman = {};
+	kiriman.id = $('#profil_id').val();
+	kiriman.membership = $('#profil_membership').val();
+	kiriman.status = $('#profil_status').val();
+	kiriman.username = $('#profil_username').val();
+	kiriman.pass = $('#profil_pass').val();
+	kiriman.email = $('#profil_email').val();
+	kiriman.home_address = $('#profil_home_address').val();
+	kiriman.contact = $('#profil_contact').val();
+	kiriman.full_name = $('#profil_fullname_span').text();
+	kiriman.gender = $('#profil_gender').val();
+	
+	return kiriman;
 	
 }
 
@@ -821,13 +1274,15 @@ function formProfilValidation(){
         },
 		submitHandler: function(form) {
 			
-			
+			// remake the data from the form-profil
+			kiriman = remakeDataFormProfil();
 			
 			$.ajax({
                 type: 'POST',
                 url: '/user/update',
                 dataType: 'json',
-                data: $('#form-profil').serialize(),
+				data: kiriman,
+                //data: $('#form-profil').serialize(),
                 success: function(result) {
 					
 					// check validity
@@ -836,12 +1291,17 @@ function formProfilValidation(){
 						$.mobile.changePage("#page-profil-updated");
 						
 						// next get back to menu
-						setTimeout(backToMenuAksi, 4000);
+						setTimeout(backToMenuAksi, 2000);
+						
+						// sembunyiin form nya
+						sembunyi('form-profil');
 					
 					}else{
 						$.mobile.changePage("#page-pilih-aksi");
 					}
 					
+					// clearup
+					clearFormProfil();
                     
                 },
                 error : function(error) {
@@ -857,14 +1317,23 @@ function formProfilValidation(){
 	
 }
 
-function formRegistrationValidation(){
+
+
+function formRegistrationValidation(anggota){
+	
+	anggotaNa = anggota;
+	
+	var untukEmail = "required";
+	if(anggotaNa){
+		untukEmail = "";
+	}
 	
      // this is for form-registrasi
 	 $("#form-registrasi").validate({
         rules: {
             peserta_baru_nama: "required",
 			peserta_baru_nomorhp: "required",
-			peserta_baru_email: "required",
+			peserta_baru_email: untukEmail,
 			peserta_baru_ttl: "required",
 			peserta_baru_pekerjaan: "required",
 			peserta_baru_alamat: "required",
@@ -881,15 +1350,37 @@ function formRegistrationValidation(){
         },
 		submitHandler: function(form) {
 			
+			// take the form based on anggota or not?
+				kiriman = remakeDataFormPesertaBaru(anggotaNa);
+			
+				//console.log('kita mau kirim ' + JSON.stringify(kiriman));
+			
 			$.ajax({
                 type: 'POST',
                 url: '/user/register',
                 dataType: "json",
-                data: $('#form-registrasi').serialize(),
+				data: kiriman,
+                //data: $('#form-registrasi').serialize(),
                 success: function(result) {
-                    $.mobile.changePage("#page-check-email");
+					if(anggotaNa){
+
+						$.mobile.changePage("#page-anggota-success");
+						
+						$('#success-anggota-nama').text(kiriman.full_name);
+						$('#success-anggota-hubungan').text(hubungan_sembunyi);
+						
+						setTimeout(backToMenuAksi, 2000);
+						
+					} else{
+						$.mobile.changePage("#page-check-email");
+					}
+					
+					// clearup
+					clearFormRegistrasi();
+					
                 },
                 error : function(error) {
+					console.log(error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -976,6 +1467,34 @@ function clickEventCancelBooking(){
 		
 		// and direct to whatsapp admin
 		console.log('trying to open whatsapp admin...');
+		
+	});
+	
+}
+
+function clickEventDeleteAnggota(){
+	
+	 $(document).on("click", ".anggota-delete" , function() {
+        
+		// get the code of that booking
+		// and post to server change the status
+		 var idNa =  $(this).attr('anggota-id');
+		 var fName = $(this).parent().parent().find('.anggota-fullname').text();
+		
+		kiriman = {
+			id: idNa,
+			full_name : fName
+		};
+	 
+		if(idNa !== undefined){
+			// call data server for updating
+			deleteDataAnggotaServer();
+		
+			refreshDataAnggotaTable();
+		}
+		
+		// and direct to whatsapp admin
+		console.log('trying to delete anggota member...');
 		
 	});
 	

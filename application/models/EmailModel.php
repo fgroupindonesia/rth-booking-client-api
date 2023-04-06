@@ -10,9 +10,23 @@ class EmailModel extends CI_Model {
 	}
 	
 	private $debugModeHere = false;
+	private $disableEmailHere = false;
+	
+	// DEBUGMODE TRUE is so PRINTOUT the email content but NO SENDING
+	// DEBUGMODE FALSE && DisableEmail is FALSE so it will SEND EMAIL
+	// DEBUGMODE TRUE && DisableEmail is TRUE so it will PRINTOUT AND NOT SEND EMAIL
+	// DEBUGMODE FALSE && DisableEmail is TRUE so it will NOT SEND EMAIL
 	
 	public function setDebugMode($n){
 		$this->debugModeHere = $n;
+	}
+	
+	public function setEmailMode($n){
+		$this->disableEmailHere = !$n;
+	}
+	
+	private function isEmailMode(){
+		return !$this->disableEmailHere;
 	}
 	
 	private function isDebugMode(){
@@ -32,12 +46,15 @@ class EmailModel extends CI_Model {
 	
 	private function printOrSendEmail($email, $title, $emailKonten){
 		if($this->isDebugMode()){
-		
+			
 			echo $emailKonten;
 		
-		} else {
+		} 
+		
+		if($this->isEmailMode()){
 			$this->sendEmailActivation($email, $title, $emailKonten);	
 		}
+		
 	}
 	
 	public function email_cancel_booking($email, $kodebooking, $fullname, $jadwalbooking, $tindakterapi){

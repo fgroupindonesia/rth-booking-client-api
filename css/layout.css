@@ -113,3 +113,15 @@ label.error {
 	 background-repeat: no-repeat;
   background-position: 0% 50%;
 }
+
+.ui-icon-anggota-baru {
+	background-image: url("/images/user2_.png");
+	 background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
+.ui-icon-anggota-semua {
+	background-image: url("/images/group_28.png");
+	 background-repeat: no-repeat;
+  background-position: 0% 50%;
+}

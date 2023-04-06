@@ -97,7 +97,47 @@ class HealthModel extends CI_Model {
 	}
 	
 	
+	public function delete($usernameIn){
+		
+		// this will eventually deleting from both table
+		// rth_health_common and also rth_health_special
+		$endResult = $this->generateRespond('invalid');
+		
+		$whereComp = array(
+			'username' => $usernameIn
+		);
+		
+			$a = $this->deleteFrom('rth_health_common', $whereComp);
+			$b = $this->deleteFrom('rth_health_special', $whereComp);
+		
+		if($a['status'] == $b['status']){
+				$endResult = $this->generateRespond('valid');
+		}
+		
+		return $endResult;
+		
+		
+	}
 	
+	public function deleteFrom($table, $whereComp){
+		
+		// this will eventually deleting from both table
+		// rth_health_common and also rth_health_special
+		
+		$endResult = $this->generateRespond('invalid');
+		
+		
+		$this->db->where($whereComp);
+		$this->db->delete($table);
+		
+		if($this->db->affected_rows() > 0){
+				$endResult = $this->generateRespond('valid');
+		}
+		
+		return $endResult;
+		
+		
+	}
 	
 	
 }

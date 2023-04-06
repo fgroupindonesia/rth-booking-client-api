@@ -21,6 +21,8 @@ class UserModel extends CI_Model {
 	
 	public function add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propicIn, $tokenIn){
 		
+		
+		
 		$stat = 'invalid';
 		
 		$createdDate = date('Y-m-d H:i:s');
@@ -48,7 +50,11 @@ class UserModel extends CI_Model {
 			'created_date' => $createdDate
 		);
 		
-		$foundInDB = $this->checkDuplicates($email, $username);
+		if(!empty($email)){
+			$foundInDB = $this->checkDuplicates($username);
+		}else{
+			$foundInDB = false;
+		}
 		
 		if($foundInDB != true){
 			$this->db->insert('rth_users', $data);
@@ -169,37 +175,23 @@ class UserModel extends CI_Model {
 	}
 	
 	
-	public function checkDuplicates($emailIn, $usernameIn){
+	public function checkDuplicates($usernameIn){
 		
 		$duplicate = false;
 		
-		$checker = array(
-			'email' => $emailIn
-		);
-		
-		
-		$query = $this->db->get_where('rth_users', $checker);
-		
-		foreach ($query->result() as $row)
-		{
-			$duplicate = true;
-			break;
-		}
-		
-		// if the email isnot duplicate
 		// we checked once more on username
 		if(!$duplicate){
 		
-		$checker = array(
-			'username' => $usernameIn
-		);
-		
-		$query = $this->db->get_where('rth_users', $checker);
-		
-		foreach ($query->result() as $row)
-		{
-			$duplicate = true;
-		}
+			$checker = array(
+				'username' => $usernameIn
+			);
+			
+			$query = $this->db->get_where('rth_users', $checker);
+			
+			foreach ($query->result() as $row)
+			{
+				$duplicate = true;
+			}
 		
 		}
 		
@@ -361,12 +353,12 @@ class UserModel extends CI_Model {
 				'username' 		=> $row->username,
 				'pass' 			=> $row->pass,
 				'email' 		=> $row->email,
-				'home_address' 		=> $row->home_address,
+				'home_address' 	=> $row->home_address,
 				'propic' 		=> $row->propic,
 				'contact' 		=> $row->contact,
-				'membership' 		=> $row->membership,
-				'full_name' 		=> $row->full_name,
-				'gender' 	=> $row->gender
+				'membership' 	=> $row->membership,
+				'full_name' 	=> $row->full_name,
+				'gender' 		=> $row->gender
 			);
 			
 			// grab all data except for admin
@@ -391,7 +383,7 @@ class UserModel extends CI_Model {
 		);
 		
 		$this->db->where($whereComp);
-		$this->db->delete('data_user');
+		$this->db->delete('rth_users');
 		
 		if($this->db->affected_rows() > 0){
 				$endResult = $this->generateRespond('valid');
@@ -409,7 +401,7 @@ class UserModel extends CI_Model {
 		);
 		
 		$this->db->where($whereComp);		
-		$query = $this->db->get('data_user');
+		$query = $this->db->get('rth_users');
 		
 		foreach ($query->result() as $row)
 		{
@@ -426,7 +418,7 @@ class UserModel extends CI_Model {
 		);
 		
 		$this->db->where($whereComp);
-		$this->db->update('data_user', $newData);
+		$this->db->update('rth_users', $newData);
 		
 		if($this->db->affected_rows() > 0){
 				$stat = 'valid';

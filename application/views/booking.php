@@ -35,7 +35,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<img src="/images/logo2.png"/> <br>
 	<h4>Pilih Menu</h4>
 	<ul data-role="listview">
-		<li><a href="#page-peserta-baru">Untuk Peserta Baru</a></li>
+		<li><a id="link-peserta-baru-tunggal" >Untuk Peserta Baru</a></li>
 		<li><a id="peserta-lama-login" href="#page-peserta-lama-login">Untuk Peserta Lama</a></li>
 		<li data-role="divider">-</li>
 		<li><a id="link-workshop" href="">Workshop</a></li>
@@ -82,8 +82,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	
 	<a href="#page-pilih-tanggal" data-inline="true" data-role="button" data-icon="booking" >Mau Booking</a>
 	
+	<br>
 	
+	<a id="link-page-all-anggota" data-inline="true" data-role="button" data-icon="anggota-semua" >Semua Anggota</a>
 	
+	<a id="link-daftar-anggota" data-inline="true" data-role="button" data-icon="anggota-baru" >Daftarkan Anggota</a>
 	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -139,8 +142,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</select>
 	</div>
 	
-	<div >
-	<label >Tanggal Mendaftar:</label>
+	<div data-role="fieldcontain">
+	<label for="profil_date_created">Tanggal Mendaftar:</label>
 	<span id="profil_date_created"> </span>
 	</div>
 	
@@ -162,7 +165,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</select>
 	
 	<a href="#page-pilih-aksi" data-inline="true" data-role="button">kembali &#60;&#60;</a>
-	<a href="#page-pilih-terapi" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
+	<a id="link-pilih-anggota" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
@@ -196,6 +199,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
 
+<section id="page-pilih-anggota" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Pilihan Peserta Therapy</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Siapa saja yang akan mendapat treatment terapi?</h3>
+	<label>Klik salah satu pilihan ini :</label>
+	
+	<select id="pilih_anggota_siapa" name="pilih_anggota_siapa" >
+		<option value="saya-sendiri">Saya Sendiri</option>
+		<!-- this will be added by jquery -->
+		<!-- <option value="saya-bersama-anggota">Saya bersama anggota</option>
+		<option value="anggota-saja">Anggota saja tanpa Saya</option> -->
+	</select>
+	
+	</fieldset>
+	<a href="#page-pilih-tanggal" data-inline="true" data-role="button">kembali &#60;&#60;</a>
+	
+	<a id="link-pilihan-terapi" href="" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
 <section id="page-riwayat" data-role="page">
 <header data-role="header" data-position="fixed"><h1>Riwayat Booking</h1></header>
 <div id="container" class="content" data-role="content" >
@@ -218,6 +243,38 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="ui-block-a"><b>CODE</b></div>
 		<div class="ui-block-b"><b>JADWAL</b></div>
 		<div class="ui-block-c"><b>STATUS</b></div>
+		<div class="ui-block-d"><b> -- </b></div>
+	</div>
+	
+	</div>
+	
+<a href="#page-pilih-aksi" data-inline="true" data-role="button">kembali &#60;&#60;</a>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>	
+
+
+<section id="page-semua-anggota" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Semua Anggota</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Seluruh Anggota Family/Kerabat anda</h3>
+	
+	<div id="anggota-loading"><img src="/images/loading.gif" /><span>Loading...
+	</span></div>
+	
+	<div id="warning-anggota" hidden>
+	<img src="/images/error.png" />
+	<p>Anda Belum memiliki data anggota lain!</p>
+	</div>
+	
+	<div id="anggota-table-container">
+	
+	<p>Klik jika ingin menghapus data anggota berikut :</p>
+	
+	<div class="ui-grid-c" id="anggota-table-head">
+		<div class="ui-block-a"><b>TANGGAL DAFTAR</b></div>
+		<div class="ui-block-b"><b>FULLNAME</b></div>
+		<div class="ui-block-c"><b>HUBUNGAN</b></div>
 		<div class="ui-block-d"><b> -- </b></div>
 	</div>
 	
@@ -291,6 +348,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	
 	<form id="form-registrasi"  method="post" data-ajax="false" >
 	
+	<div data-role="fieldcontain" id="hubungan-peserta">
+	<label for="peserta_baru_hubungan">Hubungan Dengan Anda:</label>
+	<select name="peserta_baru_hubungan"  id="peserta_baru_hubungan" >
+		<option value="1">Ayah saya</option>
+		<option value="2">Ibu saya</option>
+		<option value="3">Istri saya</option>
+		<option value="4">Suami saya</option>
+		<option value="5">Anak saya</option>
+		<option value="6">Saudara Kandung saya</option>
+		<option value="7">Saudara Angkat saya</option>
+		<option value="8">Keluarga Jauh saya</option>
+		<option value="9">Keluarga Dekat saya</option>
+		<option value="10">Tetangga saya</option>
+	</select>
+	</div>
+	
 	<div data-role="fieldcontain">
 	<label for="peserta_baru_nama">Nama Lengkap:</label>
 	<input type="text" name="peserta_baru_nama" placeholder="nama lengkap sesuai KTP" id="peserta_baru_nama" />
@@ -301,10 +374,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<input type="text" name="peserta_baru_nomorhp" id="peserta_baru_nomorhp" placeholder="whatsapp yang aktif" />
 	</div>
 	
-	<div data-role="fieldcontain">
+	<div data-role="fieldcontain" id="hubungan-tanpa-email">
+	<label for="peserta_baru_tanpa_email">Tidak Punya Email:</label>
+	<input name="peserta_baru_tanpa_email" id="peserta_baru_tanpa_email" type="checkbox" value="0" />
+	</div>
+	
+	<div data-role="fieldcontain" id="peserta_baru_bagian_email">
 	<label for="peserta_baru_email">Email:</label>
 	<input type="text" name="peserta_baru_email" id="peserta_baru_email" placeholder="email yang masih aktif" />
 	</div>
+	
+	
 	
 	<div data-role="fieldcontain">
 	<label for="peserta_baru_kelamin">Jenis Kelamin:</label>
@@ -576,6 +656,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<p>Innalillahi wa innailaihi roji'un, server sedang sibuk! </p>
 	<p>Cobalah <strong> lagi kemari dalam 30 menit setelah ini</strong> untuk dapat melanjutkan akses booking jadwal kembali!</p>
 	<a href="#page0" data-inline="true" data-role="button">Bismillah</a>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-anggota-delete-success" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Data Anggota</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Berhasil Dihapus!</h3>
+	<img src="/images/sad.png"/>
+	<p>Nama Anggota : <strong id="anggota-fullname">xxxx</strong></p>
+	
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-anggota-success" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Pendaftaran Anggota</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Berhasil!</h3>
+	<img src="/images/success.png"/>
+	<p>Walhamdulillah data <strong id="success-anggota-nama">xxxx</strong> dari <strong id="success-anggota-hubungan" > xxxx</strong> sukses disimpan!</p>
+	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
