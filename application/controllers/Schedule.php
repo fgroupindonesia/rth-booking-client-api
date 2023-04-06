@@ -62,7 +62,11 @@ class Schedule extends CI_Controller {
 	// this is for ADMIN
 	// with specific month if necessary
 	public function all(){
-		
+	
+	
+	// the format of 
+	// $mYear; is actually 'february 2002' format
+	
 	$mYear = $this->input->post('month_year');
 	$genderNa = $this->input->post('gender_therapist');
 		

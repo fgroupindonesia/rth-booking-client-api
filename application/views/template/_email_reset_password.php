@@ -1,16 +1,16 @@
------------------------------------------------------------
-<h1>Reset Password Akun</h1>
+----------------------------------------------------------- 
+Reset Password Akun
 -----------------------------------------------------------
 
 Hi!
-Barusan seseorang melakukan request Reset Password pada EDIT-VAR1
+Barusan anda melakukan request Reset Password pada <?= $date; ?> 
 untuk akun milik: 
 
-Username : $username
+Username : <?= $username; ?> 
 
-Klik di <a href="https://rumahterapiherbal.web.id/p/reset-akun.htm?$token"> tautan ini untuk melakukan reset password segera!</a>
+Klik disini <https://rumahterapiherbal.web.id/p/reset-akun.html?token=<?=$token;?>> untuk melakukan reset password segera!
 
-Setelah reset password maka kamu dapat kembali menggunakan <b>web booking Jadwal RTH</b> secara mudah!
+Setelah memberikan reset password baru dari link diatas, kamu dapat kembali menggunakan web booking Jadwal RTH seperti biasa dengan mudah!
 
 Mohon lakukan reset password sebelum 12 jam berlalu!
 

@@ -1,18 +1,19 @@
 -----------------------------------------------------------
-<h1>Resi Booking $tindakterapi pada $jadwalbooking.</h1>
+Resi Booking Jadwal
 -----------------------------------------------------------
 
 Walhamdulillah,
-Ini merupakan <b>Resi Booking Anda:</b>
+Ini merupakan Jadwal Anda:
 
-Kode Booking	: $kodebooking
-Nama Pasien 	: $fullname
-Booking Jadwal 	: $jadwalbooking
-Tindak Terapi 	: $tindakterapi
+Kode Booking	: <?=$kodebooking;?> 
+Nama Pasien 	: <?=$fullname;?> 
+Booking Jadwal 	: <?=$jadwalbooking;?> 
+Tindak Terapi 	:  
+<?=$tindakterapi;?> 
 
 Ingat untuk tidak melakukan makan dalam waktu dekat (60 menit)sebelum terapi demi kemudahan prosesi tindak terapi saat berlangsung.
 
-Ketentuan lainnya yang harus dipenuhi dapat disimak di <a href="https://www.rumahterapiherbal.web.id/p/ketentuan-wajib-ditaati.html">Klik tautan ini.</a>
+Ketentuan lainnya yang harus dipenuhi dapat disimak di Klik tautan ini<https://www.rumahterapiherbal.web.id/p/ketentuan-wajib-ditaati.html> .
 
 
 Terima kasih,

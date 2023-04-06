@@ -1,15 +1,17 @@
 -----------------------------------------------------------
-<h1>Pembatalan Booking Jadwal</h1>
+Pembatalan Booking Jadwal
 -----------------------------------------------------------
 
-Innalillahi wa inna ilaihi roji'uun,
-<b>Resi Booking Anda telah dibatalkan:</b>
+Sayang sekali,
+Jadwal Booking Anda telah dibatalkan:
 
-Kode Booking	: $kodebooking
-Nama Pasien 	: $fullname
-Booking Jadwal 	: $jadwalbooking
-Tindak Terapi 	: $tindakterapi
-Status			: <b>DIBATALKAN</b>
+Kode Booking	: <?=$kodebooking;?> 
+Nama Pasien 	: <?=$fullname;?> 
+Booking Jadwal 	: <?=$jadwalbooking;?> 
+Tindak Terapi 	: 
+<?=$tindakterapi;?> 
+
+Status			: DIBATALKAN
 
 Semoga anda bisa melakukan booking jadwal terapi berikutnya dengan penyesuaian yang telah diberikan lebih baik lagi.
 

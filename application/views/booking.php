@@ -63,6 +63,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	
 	<input id="tombol-login-submit" data-inline="true" data-role="submit" type="submit" value="login">
 	
+	<a href="#page-forgot-password" data-inline="true" data-role="link">Lupa password</a>
+	
 	</form>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -74,13 +76,82 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<h3>Selamat Datang!</h3><span id="sembunyi-username" hidden>peserta</span>
 	<p>Pilih Menu dari sini ya <b><span id="txt-fullname">peserta</span></b>! </p>
 	
-	<a id="link-page-riwayat" href="" data-inline="true" data-role="button" data-icon="riwayat" >Semua Riwayat</a>
+	<a id="link-page-riwayat" data-inline="true" data-role="button" data-icon="riwayat" >Semua Riwayat</a>
+	
+	<a id="link-buka-profil" data-inline="true" data-role="button" data-icon="profil" >Profil Saya</a>
+	
 	<a href="#page-pilih-tanggal" data-inline="true" data-role="button" data-icon="booking" >Mau Booking</a>
+	
+	
 	
 	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
+
+
+<section id="page-profil-anda" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Profil Anda</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3><span id="profil_fullname_span">Profil</span></h3>
+	<img id="image-profil" src="/images/user_48.png"/>
+	
+	<div id="profil-loading"><img src="/images/loading.gif" /><span>Loading...
+	</span></div>
+	
+	<form id="form-profil" method="post" data-ajax="false" >
+	
+	<input id="profil_id" name="profil_id" type="hidden" value="" />
+	<input id="profil_status" name="profil_status" type="hidden" value="" />
+	<input id="profil_membership" name="profil_membership" type="hidden" value="" />
+	<input id="profil_full_name" name="profil_membership" type="hidden" value="" />
+	
+	<div data-role="fieldcontain">
+	<label for="profil_username">Username:</label>
+	<input type="text" readonly name="profil_username" placeholder="ketik disini" id="profil_username" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_pass">Password:</label>
+	<input type="password" name="profil_pass" placeholder="ketik disini" id="profil_pass" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_email">Email:</label>
+	<input type="text" name="profil_email" placeholder="ketik disini" id="profil_email" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_home_address">Address:</label>
+	<input type="text" name="profil_home_address" placeholder="ketik disini" id="profil_home_address" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_contact">No Whatsapp:</label>
+	<input type="text" name="profil_contact" placeholder="ketik disini" id="profil_contact" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_gender">Gender:</label>
+	<select id="profil_gender" name="profil_gender" >
+		<option value="1">Ikhwan</option>
+		<option value="0">Akhwat</option>
+	</select>
+	</div>
+	
+	<div >
+	<label >Tanggal Mendaftar:</label>
+	<span id="profil_date_created"> </span>
+	</div>
+	
+
+	<input id="tombol-profil-submit" data-inline="true" data-role="submit" type="submit" value="save">
+	
+	</form>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
 
 <section id="page-pilih-tanggal" data-role="page">
 <header data-role="header" data-position="fixed"><h1>Pilihan Tanggal</h1></header>
@@ -118,7 +189,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<label for="checkbox-ruqyah">Ruqyah</label>
 	</fieldset>
 	<a href="#page-pilih-tanggal" data-inline="true" data-role="button">kembali &#60;&#60;</a>
-	<a id="link-pilihan-terapi" href="#page-pilih-jam" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
+	
+	<a id="link-pilihan-terapi" href="" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
 	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -128,16 +200,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <header data-role="header" data-position="fixed"><h1>Riwayat Booking</h1></header>
 <div id="container" class="content" data-role="content" >
 	<h3>Seluruh Jadwal Booking anda</h3>
-	<p>Klik jika ingin mengganti 2 jam sebelum waktunya</p>
+	
 	
 	<div id="riwayat-loading"><img src="/images/loading.gif" /><span>Loading...
 	</span></div>
+	
+	<div id="warning-data" hidden>
+	<img src="/images/error.png" />
+	<p>Anda Belum memiliki data booking jadwal!</p>
+	</div>
+	
+	<div id="riwayat-table-container">
+	
+	<p>Klik jika ingin mengganti 2 jam sebelum waktunya</p>
 	
 	<div class="ui-grid-c" id="data-table-head">
 		<div class="ui-block-a"><b>CODE</b></div>
 		<div class="ui-block-b"><b>JADWAL</b></div>
 		<div class="ui-block-c"><b>STATUS</b></div>
 		<div class="ui-block-d"><b> -- </b></div>
+	</div>
+	
 	</div>
 	
 <a href="#page-pilih-aksi" data-inline="true" data-role="button">kembali &#60;&#60;</a>
@@ -149,8 +232,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <header data-role="header" data-position="fixed"><h1>Pilihan Jam Terapi</h1></header>
 <div id="container" class="content" data-role="content" >
 	<h3>Pilihan Jam Tersedia</h3>
-	<p>Klik salah satu saja...</p>
-	<div class="ui-grid-b" id="jam8">
+	
+	<div id="pilihan-loading"><img src="/images/loading.gif" /><span>Loading...
+	</span></div>
+	
+	<div id="warning-booking" hidden>
+	<img src="/images/error.png" />
+	<p>Jadwal Saat ini Belum tersedia!</p>
+	</div>
+	
+	<div class="ui-grid-b" >
 		<div class="ui-block-a"><b>JAM</b></div>
 		<div class="ui-block-b"><b>STATUS</b></div>
 		<div class="ui-block-c"><b> --- </b></div>
@@ -198,7 +289,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<img src="/images/write.png"/>
 	<p>Harap diisi dengan lengkap.</p>
 	
-	<form id="form-registrasi" action="" method="post" data-ajax="false" >
+	<form id="form-registrasi"  method="post" data-ajax="false" >
 	
 	<div data-role="fieldcontain">
 	<label for="peserta_baru_nama">Nama Lengkap:</label>
@@ -394,6 +485,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
 
+<section id="page-reset-failed" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Reset Password Gagal</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Data Tersebut tidak kami temukan!</h3>
+	<img src="/images/error.png"/>
+	<p>Innalillahi wa innailaihi roji'un, <strong>email itu tidak pernah dipakai disini!</strong> </p>
+	<p>Saat ini silahkan coba membuat akun baru!</p>
+	<a href="#page1" data-inline="true" data-role="button">Bismillah</a>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
 <section id="page-booking-failed" data-role="page">
 <header data-role="header" data-position="fixed"><h1>Booking Gagal</h1></header>
 <div id="container" class="content" data-role="content" >
@@ -418,13 +521,60 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
 
-<section id="page-error-server" data-role="page">
-<header data-role="header" data-position="fixed"><h1>Pendaftaran Gagal</h1></header>
+<section id="page-login-pending" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Status Login</h1></header>
 <div id="container" class="content" data-role="content" >
-	<h3>Pembuatan Akun Gagal</h3>
+	<h3>Akses Terbatas</h3>
 	<img src="/images/error.png"/>
-	<p>Innalillahi wa innailaihi roji'un, server sedang error! </p>
-	<p>Cobalah <strong> kembali lagi kemari dalam 30 menit setelah ini</strong> untuk dapat melakukan booking jadwal!</p>
+	<p>Klik link aktifasi yang didapat pada email saat mendaftar, lalu coba login kembali.</p>
+	<a href="#page-peserta-lama-login" data-inline="true" data-role="button">Bismillah</a>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-login-disabled" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Status Login</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Akses Tidak Berhasil</h3>
+	<img src="/images/error.png"/>
+	<p>Hubungi pihak admin untuk mengaktifkan akun anda kembali normal.</p>
+	<a id="link-kontak-admin" href="" data-inline="true" data-role="button">Kontak Whatsapp</a>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-forgot-password" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Reset Password</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Lupa kata kunci (password)</h3>
+	<img src="/images/ask.png"/>
+	<p>Input email saat pertama kali mendaftar untuk me-reset password:</p>
+	
+	<form id="form-reset" action="" method="post" data-ajax="false" >
+	
+	<div data-role="fieldcontain">
+	<label for="reset_email">Email</label>
+	<input type="text" name="reset_email" placeholder="ketik disini" id="reset_email" />
+	</div>
+	
+	<a href="#page1" data-inline="true" data-role="button">kembali &#60;&#60;</a>
+	<input id="tombol-reset-submit" data-inline="true" data-role="submit" type="submit" value="reset">
+	
+	</form>
+	
+	
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-error-server" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Error</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Server Error</h3>
+	<img src="/images/error.png"/>
+	<p>Innalillahi wa innailaihi roji'un, server sedang sibuk! </p>
+	<p>Cobalah <strong> lagi kemari dalam 30 menit setelah ini</strong> untuk dapat melanjutkan akses booking jadwal kembali!</p>
 	<a href="#page0" data-inline="true" data-role="button">Bismillah</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -451,6 +601,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<p>Walhamdulillah, jadwal booking anda berhasil! </p>
 	<p>Kode Booking : <strong id="booking-success-code">xxxx</strong> dengan Jadwal anda :<strong id="booking-success-date" > xxxx</strong> </p>
 	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-profil-updated" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Profil Updated</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Data Terupdate!</h3>
+	<img src="/images/success.png"/>
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-reset-continue" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Reset Password</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Ikuti Langkah Berikutnya</h3>
+	<img src="/images/email.png"/>
+	<p>Walhamdulillah, selangkah lagi untuk mereset password anda </p>
+	<p>Check <strong>inbox email</strong> dan klik email yang kami berikan segera!</p>
+	<a href="https://mail.google.com" data-role="button">&#62;&#62; selanjutnya</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>

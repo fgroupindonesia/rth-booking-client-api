@@ -102,6 +102,12 @@ label.error {
    
 }
 
+.ui-icon-profil {
+	background-image: url("/images/user.png");
+	 background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
 .ui-icon-riwayat {
 	background-image: url("/images/time.png");
 	 background-repeat: no-repeat;

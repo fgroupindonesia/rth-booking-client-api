@@ -1,5 +1,12 @@
+var username_sembunyi = "";
+var fullname_sembunyi = "";
+var jadwal_sembunyi = "";
+var gender_sembunyi = "";
+var month_year_sembunyi = "";
+
+
 $(document).ready(function(){
-	
+
 	createSelectOption2Weeks();
 	toggleAllTindakan();
 	
@@ -10,21 +17,75 @@ $(document).ready(function(){
 	clickEventAwal();
 	clickEventAllBooking();
 	clickEventCancelBooking();
+	clickEventPilihJadwalTerapi();
+	clickEventPilihTanggal();
+	clickEventBukaProfil();
 	
 	aktifkanTombolNext();
+	
 	
 	setTimeout(nextPage1, 3000);
 	
 	formRegistrationValidation();
-	
 	formLoginValidation();
+	formResetPassValidation();
+	formProfilValidation();
 	
+	aktifkanLinkKontakAdmin();
 	
 	pilihJam();
 	
 });
 
+function aktifkanLinkKontakAdmin(){
+	
+	$("#link-kontak-admin").click(function() {
+	
+		window.parent.location.href = goToWhatsappKontak();
+	
+	});
+	
+	
+}
+
 var kiriman = "";
+
+function clickEventPilihTanggal(){
+	
+	// default na
+	var formatDiinginkan = "MMMM YYYY";
+	var formatDipakePC = "YYYY-MM-DD";
+	
+	month_year_sembunyi = moment().format(formatDiinginkan).toLowerCase();
+	
+	
+	$('#pilih-tanggal').change(function() {
+		// this date should be reformatted 
+		var tgl = $('#pilih-tanggal option:selected').val();
+		//alert(tgl);
+		var terima = moment(tgl, formatDipakePC).format(formatDiinginkan);
+		month_year_sembunyi = terima.toLowerCase();
+		//alert('dipilih skrg ' + terima);
+	 });
+	
+	
+}
+
+function clickEventPilihJadwalTerapi(){
+	
+	
+	$("#link-pilihan-terapi").click(function() {
+	
+		refreshDataPilihanBooking();
+		
+		
+		$.mobile.changePage("#page-pilih-jam");
+		
+		
+	});
+	
+	
+}
 
 function clickEventAllBooking(){
 	
@@ -34,6 +95,8 @@ function clickEventAllBooking(){
 		refreshDataTable();
 		
 		tampilin('riwayat-loading');
+		tampilin('riwayat-table-container');
+		sembunyi('warning-data');
 		
 		$.mobile.changePage("#page-riwayat");
 		
@@ -49,6 +112,59 @@ function clickEventAllBooking(){
 	
 }
 
+function clickEventBukaProfil(){
+	//alert('lkii');
+	sembunyi('form-profil');
+	
+	$("#link-buka-profil").click(function() {
+	
+		refreshDataProfil();
+		
+		$.mobile.changePage("#page-profil-anda");
+		
+		
+	});
+	
+	
+}
+
+function refreshDataProfil(){
+	
+	tampilin('profil-loading');
+	
+	kiriman = {
+			username : username_sembunyi
+	};
+	
+	
+	//alert('akan kirim '  + JSON.stringify(kiriman));
+	
+	// grab data after 3 seconds
+	setTimeout( grabDataProfilServer, 3000);
+	
+}
+
+function refreshDataPilihanBooking(){
+	
+	// hide semua tombol, warning-booking
+	// lalu munculkan loading
+	tampilin('pilihan-loading');
+		sembunyiParentDiv('.tombol-booking');
+		sembunyi('warning-booking');
+	
+	// the data tobe passed into server	
+	kiriman = {
+		month_year : month_year_sembunyi,
+		gender_therapist : gender_sembunyi		
+	};
+	
+	//alert('akan kirim '  + JSON.stringify(kiriman));
+	
+	// grab data after 3 seconds
+	setTimeout( grabDataSchedulesServer, 3000);
+	
+}
+
 function refreshDataTable(){
 	
 	// clear the div
@@ -57,10 +173,80 @@ function refreshDataTable(){
 	// show the loading
 	tampilin('riwayat-loading');
 		
-	
 	// grab after 3 seconds
 	setTimeout(	grabDataServer, 3000);
 
+	
+}
+
+function aktifinTombolJam(dataJSON){
+	
+	
+	
+}
+
+function grabDataProfilServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/profile',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						extractDataProfil(result);
+						tampilin('form-profil');
+						
+					}
+					
+					sembunyi('profil-loading');
+					
+					//console.log(result);
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function grabDataSchedulesServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/schedule/all',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						aktifinTombolJam(result);
+						
+					}else{
+						sembunyiParentDiv('.tombol-booking');
+						tampilin('warning-booking');
+					}
+					
+						sembunyi('pilihan-loading');
+					
+					
+					console.log(result);
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
 	
 }
 
@@ -78,9 +264,14 @@ function grabDataServer(){
 					if(checkValidity(result)){
 						
 						extractDataToTable(result);
-						sembunyi('riwayat-loading');
 						
+					}else{
+						sembunyi('riwayat-table-container');
+						tampilin('warning-data');
 					}
+					
+						sembunyi('riwayat-loading');
+					
 					
 					//console.log(result);
 					
@@ -128,6 +319,7 @@ function updateDataServer(){
 					
                 },
                 error : function(error) {
+					console.log(error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -135,10 +327,10 @@ function updateDataServer(){
 }
 
 function generateRandomString(length){
-	 let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    let counter = 0;
+	 var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    var counter = 0;
     while (counter < length) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
       counter += 1;
@@ -161,7 +353,7 @@ function pilihJam(){
 
 function collectBookingOrder(jamMasuk){
 	var codeNa =	generateRandomString(4) + "-" + generateRandomString(3);
-	var status = "pending";
+	
 	var usernameNa = username_sembunyi;
 	var fullNa = fullname_sembunyi;
 	var schedDate = $('#pilih-tanggal').val();
@@ -180,7 +372,7 @@ function collectBookingOrder(jamMasuk){
 		
 		// the values of treatment are true / false
 		// and then converted to number 1 or 0
-		var objTreatment = new Object;
+		var objTreatment = {};
 
 	objTreatment.tindakan_umum = Number($('#checkbox-umum').prop('checked'));
 	objTreatment.bekam = Number($('#checkbox-bekam').prop('checked'));
@@ -190,7 +382,7 @@ function collectBookingOrder(jamMasuk){
 	objTreatment.lintah = Number($('#checkbox-lintah').prop('checked'));
 	objTreatment.pijat = Number($('#checkbox-pijat-fullbody').prop('checked'));
 	
-	var dataTreatement = JSON.stringify(objTreatment);
+	//var dataTreatement = JSON.stringify(objTreatment);
 	
 	
 	
@@ -211,14 +403,54 @@ function collectBookingOrder(jamMasuk){
 	
 }
 
-function extractDataToTable(dataCome){
+function extractDataProfil(dataCome){
 	
 	var n = JSON.stringify(dataCome);
-    const data = JSON.parse(n); // Try to parse the response as JSON
+    var data = JSON.parse(n); // Try to parse the response as JSON
 	
 	var isiNa = data.multi_data;
 	
-	for(let p = 0; p < isiNa.length; p++){
+	$('#profil_username').val(isiNa.username);
+	$('#profil_pass').val(isiNa.pass);
+	$('#profil_email').val(isiNa.email);
+	$('#profil_home_address').val(isiNa.home_address);
+	$('#profil_contact').val(isiNa.contact);
+	$('#profil_full_name').val(isiNa.full_name);
+	$('#profil_fullname_span').text(isiNa.full_name);
+	
+	$('#profil_date_created').text(isiNa.created_date);
+	
+	// this is hidden
+	$('#profil_id').val(isiNa.id);
+	$('#profil_membership').val(isiNa.membership);
+	$('#profil_status').val(isiNa.status);
+	
+	
+	var opsi = 'value=' + isiNa.gender;
+	$('#profil_gender option['+opsi+']').prop('selected', true);
+	$('#profil_gender').selectmenu('refresh', true);
+	
+	
+	var imageNa = "";
+	// change the img of this elemen
+	if(isiNa.gender == 0){
+			imageNa = "female.png";
+	}else{
+			imageNa = "male.png";
+	}
+	
+	$('#image-profil').attr('src', '/images/'+imageNa);
+	
+}
+
+function extractDataToTable(dataCome){
+	
+	var n = JSON.stringify(dataCome);
+    var data = JSON.parse(n); // Try to parse the response as JSON
+	
+	var isiNa = data.multi_data;
+	var p = 0;
+	for(p = 0; p < isiNa.length; p++){
 		//console.log(isiNa[p]);
 		/*
 		CREATING NEW DIV BELOW THIS ONE
@@ -310,6 +542,14 @@ function extractTreatment(dataObject){
 	
 }
 
+function asHumanTrouble(){
+	var nLine = "ENTER";
+	var pesanAkhir = "Hello *admin RTH!*" + nLine +
+				"saya *perlu bantuan akun login*" + nLine;
+					
+	return pesanAkhir;
+}
+
 function asHumanSadMessage(dataObject){
 	
 	var kode = dataObject.code;
@@ -341,6 +581,19 @@ function asHumanMessage(dataObject){
 					
 	
 	return pesanAkhir;
+}
+
+function goToWhatsappKontak(){
+	
+	var message = asHumanTrouble();
+	
+	var pesan = encodeURI(message).replaceAll("ENTER", "%0a");
+	var nomerAdmin = "6285871341474";
+	//https://api.whatsapp.com/send?phone=whatsappphonenumber&text=urlencodedtext
+	var url = "https://api.whatsapp.com/send?phone=" + nomerAdmin + "&text=" + pesan;
+	console.log("WHATSAPP : " + url);
+	return url;
+	
 }
 
 function goToWhatsapp(dataObject){
@@ -415,9 +668,9 @@ function checkValidity(dataCome){
 	
 	try {
 	  var n = JSON.stringify(dataCome);
-      const data = JSON.parse(n); // Try to parse the response as JSON
+      var data = JSON.parse(n); // Try to parse the response as JSON
       
-	  if(data["status"] == "valid"){
+	  if(data.status == "valid"){
 		  val = true;
 	  }
 	  
@@ -429,8 +682,53 @@ function checkValidity(dataCome){
 	
 }
 
-var username_sembunyi = "";
-var jadwal_sembunyi = "";
+function formResetPassValidation(){
+	
+	
+	// this is for form-login
+	 $("#form-reset").validate({
+        rules: {
+            reset_email: "required"
+        },
+        messages: {
+            reset_email: "Isilah pake email saat mendaftar!"
+        },
+		submitHandler: function(form) {
+			
+			$.ajax({
+                type: 'POST',
+                url: '/user/resetpass',
+                dataType: 'json',
+                data: $('#form-reset').serialize(),
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						
+					$.mobile.changePage("#page-reset-continue");
+						
+					
+					}else{
+						$.mobile.changePage("#page-reset-failed");
+					}
+					
+                    
+                },
+                error : function(error) {
+					console.log(error);
+					alert(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+			
+		}
+    });
+	
+	
+}
+
+
 
 function formLoginValidation(){
 	
@@ -450,18 +748,28 @@ function formLoginValidation(){
 			$.ajax({
                 type: 'POST',
                 url: '/user/login',
-                dataType: "json",
+                dataType: 'json',
                 data: $('#form-login').serialize(),
                 success: function(result) {
 					
 					// check validity
 					if(checkValidity(result)){
-						$.mobile.changePage("#page-pilih-aksi");
-					
+						
 						//ambil nama username dari json
 						var n = JSON.stringify(result);
-						const dataNa = JSON.parse(n);
-						var dataJSON = dataNa['multi_data'];
+						var dataNa = JSON.parse(n);
+						var dataJSON = dataNa.multi_data;
+						
+						//console.log('didapat lah ' + JSON.stringify(dataJSON));
+						var statNa = dataJSON.status;
+						
+						if(statNa == 'pending'){
+							$.mobile.changePage("#page-login-pending");
+						}else if(statNa == 'disabled') {
+							$.mobile.changePage("#page-login-disabled");
+						}else if(statNa == 'active'){
+							$.mobile.changePage("#page-pilih-aksi");
+						}
 						
 						$('#txt-fullname').text(dataJSON.full_name);
 						$('#sembunyi-username').text(dataJSON.username);
@@ -469,6 +777,7 @@ function formLoginValidation(){
 						// this is a hack only
 						username_sembunyi = dataJSON.username;
 						fullname_sembunyi = dataJSON.full_name;
+						gender_sembunyi = dataJSON.gender;
 					
 					}else{
 						$.mobile.changePage("#page-login-failed");
@@ -477,6 +786,67 @@ function formLoginValidation(){
                     
                 },
                 error : function(error) {
+					console.log(error);
+					alert(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+			
+		}
+    });
+	
+	
+}
+
+
+function formProfilValidation(){
+	
+	//alert('sedang validating...');
+	
+	// this is for form-login
+	 $("#form-profil").validate({
+        rules: {
+			profil_pass: "required",
+			profil_email: "required",
+			profil_full_name: "required",
+			profil_home_address: "required",
+			profil_contact: "required"
+        },
+        messages: {
+			profil_pass: "Tulis password pakai kombinasi huruf dan angka!",
+			profil_email: "Tulis email anda yang masih aktif!",
+			profil_full_name: "Tulis nama lengkapnya",
+			profil_home_address: "Alamat lengkap anda dimana?",
+			profil_contact: "Nomor whatsappnya?"
+        },
+		submitHandler: function(form) {
+			
+			
+			
+			$.ajax({
+                type: 'POST',
+                url: '/user/update',
+                dataType: 'json',
+                data: $('#form-profil').serialize(),
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						$.mobile.changePage("#page-profil-updated");
+						
+						// next get back to menu
+						setTimeout(backToMenuAksi, 4000);
+					
+					}else{
+						$.mobile.changePage("#page-pilih-aksi");
+					}
+					
+                    
+                },
+                error : function(error) {
+					console.log(error);
+					//alert(error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -640,14 +1010,53 @@ function clickEventFormKesehatan(){
 	
 }
 
+function sembunyiParentDiv(idNa){
+	var namina = "";
+	
+	if(!idNa.includes('#') && !idNa.includes('.')){
+	
+		namina = '#' + idNa;
+	
+	}else{
+		namina = idNa;
+	}
+	
+	//console.log('sembunyiin ' + namina);
+	
+	$(namina).parent().hide();
+}
+
 function sembunyi(idNa){
-	var namina = '#' + idNa;
-	$(namina).fadeOut();
+	
+	
+	var namina = "";
+	
+	if(!idNa.includes('#') && !idNa.includes('.')){
+	
+		namina = '#' + idNa;
+	
+	}else{
+		namina = idNa;
+	}
+	
+	//console.log('sembunyiin ' + namina);
+	
+	$(namina).hide();
 }
 
 function tampilin(idNa){
-	var namina = '#' + idNa;
-	$(namina).fadeIn();
+	
+	var namina = "";
+	
+	if(!idNa.includes('#') && !idNa.includes('.')){
+	
+		namina = '#' + idNa;
+	
+	}else{
+		namina = idNa;
+	}
+	
+	$(namina).show();
 }
 
 function toggleAllTindakan(){
@@ -691,6 +1100,12 @@ function toggleAllTindakan(){
 		
 }
 
+function backToMenuAksi(){
+	
+	$.mobile.changePage("#page-pilih-aksi", "flip", true, true);
+
+}
+
 function nextPage1(){
 	
 	$.mobile.changePage("#page1", "flip", true, true);
@@ -716,10 +1131,10 @@ function createSelectOption2Weeks(){
 	var formatDiinginkan = 'dddd, D-MMM-YYYY';
 	var formatDB = 'YYYY-MM-DD';
 	var formatHariAja = 'dddd';
-	let dateFormat1 = moment().format(formatDiinginkan);
+	//let dateFormat1 = moment().format(formatDiinginkan);
 	
 	
-	for(x=0; x<limit; x++){
+	for(x=-1; x<limit; x++){
 		var tglDB = moment().add(x+1, "day").format(formatDB);
 		var tgl = moment().add(x+1, "day").format(formatDiinginkan);
 		var hariAja = moment().add(x+1, "day").format(formatHariAja);
@@ -734,9 +1149,9 @@ function createSelectOption2Weeks(){
 
 function convertDayEnglishToIndo(dayName){
 	
-	const english = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	var english = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 	
-	const indo = ["Ahad", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+	var indo = ["Ahad", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 	
 	var i=0;
 	var hariIndo = "";

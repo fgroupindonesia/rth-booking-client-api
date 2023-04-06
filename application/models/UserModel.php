@@ -19,12 +19,22 @@ class UserModel extends CI_Model {
 		return $stat;
 	}
 	
-	public function add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propicIn){
+	public function add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propicIn, $tokenIn){
 		
 		$stat = 'invalid';
 		
+		$createdDate = date('Y-m-d H:i:s');
+		
+		// we also have status:
+		// 1. pending - waiting activation
+		// 2. active - normal
+		// 3. disabled - because problem or something else
+		
+		$statusUserNa = 'pending';
+	
 		$data = array(
 			'username' 	=> $username,
+			'status'	=> $statusUserNa,
 			'home_address' 		=> $home_address,
 			'contact' 	=> $contact,
 			'email' 	=> $email,
@@ -33,7 +43,9 @@ class UserModel extends CI_Model {
 			'propic'	=> $propicIn,
 			'alive' => $alive,
 			'gender' => $gender,
-			'membership' => $membership
+			'token'	=> $tokenIn,
+			'membership' => $membership,
+			'created_date' => $createdDate
 		);
 		
 		$foundInDB = $this->checkDuplicates($email, $username);
@@ -55,13 +67,14 @@ class UserModel extends CI_Model {
 		return $this->generateRespond($stat);
 	}
 	
-	public function edit($id, $username, $pass, $email, $home_address, $contact, $full_name, $propic, $membership, $gender){
+	public function edit($id, $username, $pass, $email, $home_address, $contact, $full_name, $propic, $membership, $gender, $status){
 		
 		$stat = 'invalid';
 		
 		$data = array(
 			'username' 	=> $username,
 			'pass' 		=> $pass,
+			'status'	=> $status,
 			'email' 	=> $email,
 			'home_address' 	=> $home_address,
 			'contact' 	=> $contact,
@@ -87,7 +100,74 @@ class UserModel extends CI_Model {
 		return $this->generateRespond($stat);
 		
 	}
+	
+	public function updatePassword($pass, $token){
 		
+		$stat = 'invalid';
+		
+		$data = array(
+			'pass' 		=> $pass,
+			'status'	=> 'active'
+		);
+		
+		$this->db->where('token', $token);
+		$this->db->update('rth_users', $data);
+		
+		if($this->db->affected_rows() > 0){
+				$stat = 'valid';
+		}
+		
+		return $this->generateRespond($stat);
+		
+	}
+	
+	// we lock this user 
+	// because of something maybe resetting password
+	// or something else
+	public function lockUser($email, $token){
+		
+		$stat = 'invalid';
+		
+		$data = array(
+			'status'	=> 'disabled',
+			'token'		=> $token
+		);
+		
+		$this->db->where('email', $email);
+		$this->db->update('rth_users', $data);
+		
+		if($this->db->affected_rows() > 0){
+				$stat = 'valid';
+		}
+		
+		return $this->generateRespond($stat);
+		
+	}
+	
+	public function activateUser($email, $token){
+		
+		$stat = 'invalid';
+		
+		$data = array(
+			'email' 	=> $email,
+			'token' 	=> $token
+		);
+		
+		$updateData = array (
+			'status' => 'active'
+		);
+		
+		$this->db->where($data);
+		$this->db->update('rth_users', $updateData);
+		
+		if($this->db->affected_rows() > 0){
+				$stat = 'valid';
+		}
+		
+		return $this->generateRespond($stat);
+		
+	}
+	
 	
 	public function checkDuplicates($emailIn, $usernameIn){
 		
@@ -144,6 +224,9 @@ class UserModel extends CI_Model {
 				'email' 		=> $row->email,
 				'home_address' 		=> $row->home_address,
 				'propic' 		=> $row->propic,
+				'status' 		=> $row->status,
+				'token' 		=> $row->token,				
+				'created_date' 		=> $row->created_date,	
 				'contact' 		=> $row->contact,				
 				'membership' 		=> $row->membership,
 				'full_name' 		=> $row->full_name,
@@ -352,24 +435,25 @@ class UserModel extends CI_Model {
 		return $this->generateRespond($stat);
 	}	
 	
-	public function getProfile($idIn){
+	public function getProfileBy($col, $val){
 		
 		$endResult = $this->generateRespond('invalid');
 		
 		$multiParam = array(
-			'id' => $idIn
+			$col => $val
 		);
 		
 		$this->db->where($multiParam);		
-	
 		$query = $this->db->get('rth_users');
 		
 		foreach ($query->result() as $row)
 		{
+			
 			$endResult['status'] = 'valid';
 			
 				$data = array(
 				'id' 			=> $row->id,
+				'status' 			=> $row->status,
 				'username' 		=> $row->username,
 				'pass' 			=> $row->pass,
 				'email' 		=> $row->email,
@@ -378,16 +462,31 @@ class UserModel extends CI_Model {
 				'contact' 		=> $row->contact,
 				'membership' 		=> $row->membership,
 				'full_name' 		=> $row->full_name,
+				'created_date' 		=> $row->created_date,
+				'status' 		=> $row->status,
+				'token' 		=> $row->token,
 				'gender' 	=> $row->gender
 			);
 			
 			$endResult['multi_data'] = $data;
 		}
 		
-		
-		
 		if($endResult['status'] == 'invalid'){
 			unset($endResult['multi_data']);
+		}
+		
+		return $endResult;
+		
+	}
+	
+	public function getProfile($idOrEmail){
+		
+		$endResult = $this->generateRespond('invalid');
+		
+		$endResult = $this->getProfileBy('id', $idOrEmail);
+		
+		if($endResult['status'] == 'invalid'){
+			$endResult = $this->getProfileBy('email', $idOrEmail);
 		}
 		
 		return $endResult;

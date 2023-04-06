@@ -8,62 +8,18 @@ class User extends CI_Controller {
 		$this->load->model('UserModel');
 		$this->load->model('PictureModel');
 		$this->load->model('HealthModel');
+		$this->load->model('EmailModel');
+		
+		// turn this off if the site is ALIVE 
+		$this->EmailModel->setDebugMode(true);
 	}
 	
 	public function test(){
-		echo "X";
+		$n = date('l, d-F-Y H:i:s');
+		echo "X " . $n;
 	}
 	
-	public function testEmail(){
-		$this->sendEmailActivation('gumuruh@gmail.com');
-		echo "send email...";
-	}
-	
-	public function resetpass(){
-		
-		$username = "contoh";
-		$token = "contoh-token";
-		
-		$dataArray = array(
-			'username' => $username,
-			'token' => $token
-		);
-		
-		$emailKonten = $this->load->view('template/_email_reset_password', $dataArray, TRUE);
-
-		$this->sendEmailActivation('fgroupindonesia@gmail', 'Reset Password Akun', $emailKonten);	
-		
-		echo "reset pass";
-		
-	}
-	
-	public function sendEmailActivation($dest, $judul, $htmlkonten){
-		
-		//valid sampe 
-		
-		$config = array(
-		'protocol' => 'smtp', // 'mail', 'sendmail', or 'smtp'
-		'smtp_host' => 'ssl://smtp.elasticemail.com', 
-		'smtp_port' => 2525,
-		'smtp_user' => 'admin@rumahterapiherbal.web.id',
-		'smtp_pass' => '15A849C22480B2E07306C1CCCEE80A3EDA90',
-		'smtp_crypto' => 'ssl', //can be 'ssl' or 'tls' for example
-		'mailtype' => 'html', //plaintext 'text' mails or 'html'
-		'smtp_timeout' => '7', //in seconds
-		'charset' => 'iso-8859-1',
-		'wordwrap' => TRUE
-		);
-
-		$this->load->library('email', $config);
-		$this->email->from('admin@rumahterapiherbal.web.id', 'RTH - Rumah Terapi Herbal');
-		
-		$this->email->to($dest);
-		$this->email->subject($judul);
-		$this->email->message($htmlkonten);
-		$this->email->send();
-	}
-	
-	private function generatePass($length){
+	private function generateToken($length){
 		return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length/strlen($x)) )),1,$length);
 	}
 	
@@ -82,12 +38,15 @@ class User extends CI_Controller {
 	
 	public function register(){
 		
-		
 		$email 			= $this->input->post('peserta_baru_email');
 		
 		// user name dan pass dari sistem saja
 		$username 		= $this->getEmail($email);
-		$pass 			= $this->generatePass(7);
+		$pass 			= $this->generateToken(7);
+		
+		// we also generate 25 digit of token
+		// for activation later
+		$token 			= $this->generateToken(25);
 		
 		
 		$home_address 	= $this->input->post('peserta_baru_alamat');
@@ -112,7 +71,7 @@ class User extends CI_Controller {
 		 $propic = $res;
 	 }
 	 
-		 $endRespond = $this->UserModel->add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propic);
+		 $endRespond = $this->UserModel->add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propic, $token);
 		 
 		 
 		 if($endRespond['status'] = 'valid'){
@@ -137,6 +96,12 @@ class User extends CI_Controller {
 			 
 			 $this->HealthModel->add_special($ritual, $tenaga, $mimpi,
 			 $kunjungan, $ghaib, $username);
+			 
+			 // sending Email Notification
+			$this->EmailModel->email_register_success($email, $full_name, $username, $contact, $pass, $token);
+			
+			// we dont check any further here
+			
 		 }
 	 
 		
@@ -144,10 +109,70 @@ class User extends CI_Controller {
 		
 	}
 	
+	// this is for CLIENT Reset Password Step-2 : clicking GET URL
+	public function aktifasi(){
+		
+		 $token 		= $this->input->get('token');
+		 $email 		= $this->input->get('email');
+		
+		$endRespond = $this->UserModel->activateUser($email, $token);
+			
+		echo json_encode($endRespond);
+	}
+	
+	// this is for CLIENT Reset Password Step-1 : posting form
+	public function resetPass(){
+		
+		$email	=	$this->input->post('reset_email');
+		
+		$dataDB = $this->UserModel->getProfile($email);
+		
+		// if fails then store it for later usage if it is invalid
+		$endRespond = $dataDB;
+		if($dataDB['status'] == 'valid'){
+				
+			$dataUser = $dataDB['multi_data'];
+			$username = $dataUser['username'];
+			
+			// this for locking purposes
+			// this 24 digit for URL Resetting Password
+			$token    = $this->generateToken(25);
+			$endRespond = $this->UserModel->lockUser($email, $token);
+			
+			$this->EmailModel->email_reset_pass($email, $username, $token);
+		}
+		
+		echo json_encode($endRespond);
+		
+	}
+	
+	// this is for CLIENT Reset Password Step-3 : submit form
+	public function updatePass(){
+		
+		$pass	=	$this->input->post('pass');
+		$token	=	$this->input->post('token');
+		
+		$dataUser = $this->UserModel->getProfileBy('token', $token);
+		
+		$emailna = $dataUser['multi_data']['email'];
+		$phone =  $dataUser['multi_data']['contact'];
+		
+		// update the password, and the status to be active inside
+		// given by its token 
+		$endRespond = $this->UserModel->updatePassword($pass, $token);
+		
+		// send the email notification too
+		$this->EmailModel->email_updated_pass($emailna, $phone, $pass);	
+			
+		echo json_encode($endRespond);
+		
+	}
+	
 	public function update(){
 		
-		
+		// this is coming from mobile 
 		$id 		= $this->input->post('id');
+		$status 	= $this->input->post('status');
 		$username 	= $this->input->post('username');
 		$pass 		= $this->input->post('pass');
 		$email 		= $this->input->post('email');
@@ -156,6 +181,28 @@ class User extends CI_Controller {
 		$full_name 	= $this->input->post('full_name');
 		$gender 	= $this->input->post('gender');
 		$member 	= $this->input->post('membership');
+		
+		// this is coming from Web
+		if(!isset($email)){
+			$id 		= $this->input->post('profil_id');
+			$status 	= $this->input->post('profil_status');
+			$username 	= $this->input->post('profil_username');
+			$pass 		= $this->input->post('profil_pass');
+			$email 		= $this->input->post('profil_email');
+			$home_address 	= $this->input->post('profil_home_address');
+			$contact 	= $this->input->post('profil_contact');
+			$full_name 	= $this->input->post('profil_full_name');
+			$gender 	= $this->input->post('profil_gender');
+			$member 	= $this->input->post('profil_membership');
+			
+		}
+		
+		if(!isset($status)){
+			// given for default
+			$status = 'active';
+		}
+		
+		
 		// the null here is used to make the db not updating picture column 
 		
 		$propic		= null;
@@ -169,7 +216,7 @@ class User extends CI_Controller {
 			 $propic = $res;
 		 }
 		
-		$endRespond = $this->UserModel->edit($id, $username, $pass, $email, $home_address, $contact, $full_name, $propic, $member, $gender);
+		$endRespond = $this->UserModel->edit($id, $username, $pass, $email, $home_address, $contact, $full_name, $propic, $member, $gender, $status);
 		
 		
 		echo json_encode($endRespond);
@@ -211,10 +258,15 @@ class User extends CI_Controller {
 	
 	public function profile(){
 		
-		
 		$id 	= $this->input->post('id');
+		$us 	= $this->input->post('username');
 		
 		$dataUsed = $this->UserModel->getProfile($id);
+		
+		// try once more
+		if($dataUsed['status'] == 'invalid' && isset($us)){
+			$dataUsed = $this->UserModel->getProfileBy('username', $us);
+		}
 		
 		echo json_encode($dataUsed);
 		
