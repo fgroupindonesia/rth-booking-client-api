@@ -1,4 +1,14 @@
 
+.bold {
+	font-weight: bold;
+	color: green;
+}
+
+.red {
+	font-weight: bold;
+	color: red;
+}
+
 label.error {
 		color: red;
 		font-size: 16px;
@@ -40,19 +50,20 @@ label.error {
 		background-color: yellow;
 }
 
-#link-update {
+#link-update, .treatment-code a {
 	background: url('/images/edit.png') no-repeat 5px center;
 	background-size: 18px 18px;
 	background-position: left;
 	padding-left: 20px;;
 }
 
-#link-delete {
+#link-delete, .treatment-cancel {
 	background: url('/images/error_28.png') no-repeat 5px center;
 	background-size: 18px 18px;
 	background-position: left;
 	padding-left: 20px;;
 }
+
 
 #refresh-all {
 	background: url('/images/refresh.png') no-repeat 5px center;
@@ -81,7 +92,7 @@ label.error {
      text-decoration:underline;
 }
 
-#container {
+.content {
 	text-align: center;
 	margin: auto;
 }
@@ -125,3 +136,5 @@ label.error {
 	 background-repeat: no-repeat;
   background-position: 0% 50%;
 }
+
+

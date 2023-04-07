@@ -62,11 +62,16 @@ class Booking extends CI_Controller {
 		
 		
 	$username 			= $this->input->post('username');
+	$includeFamily = $this->input->post('family');
+	
+	if(!isset($includeFamily)){
+		$includeFamily = false;
+	}
 	
 	
 	// either for CLIENT 
 	if(isset($username)){
-		$endRespond 	=	$this->BookingRequestModel->getAllSpecific($username);	
+		$endRespond 	=	$this->BookingRequestModel->getAllSpecific($username, $includeFamily);	
 	
 	// or for ADMIN
 	}else {	
@@ -79,7 +84,15 @@ class Booking extends CI_Controller {
 		
 	}
 	
-	
+	public function detail(){
+		
+		$code 			= $this->input->post('id');
+		
+		$endResult = $this->BookingRequestModel->getSpecific($code);
+		
+		echo json_encode($endResult);
+		
+	}
 	
 	public function edit(){
 		

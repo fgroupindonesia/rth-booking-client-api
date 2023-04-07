@@ -9,6 +9,8 @@ class BookingRequestModel extends CI_Model {
 		
 	}
 	
+	
+	
 	// status whether it is 'valid' or 'invalid'
 	public function generateRespond($statusIn){
 		
@@ -17,6 +19,70 @@ class BookingRequestModel extends CI_Model {
 		);
 		
 		return $stat;
+	}
+	
+	private function getFullname($fromUsername){
+		
+		
+		$multiParam1 = array(
+			'username' => $fromUsername
+		);
+		
+		$this->db->where($multiParam1);		
+		$query = $this->db->get('rth_users');
+		
+		$foundData = "";
+		
+		foreach ($query->result() as $row)
+		{
+			$foundData =	$row->full_name;
+		}
+		
+		return $foundData;
+		
+	}
+	
+	public function getSpecific($idNa){
+		
+		$endResult = $this->generateRespond('invalid');
+		
+		$multiParam1 = array(
+			'id' => $idNa
+		);
+		
+		
+		$this->db->where($multiParam1);		
+		$query = $this->db->get('rth_booking_request');
+		
+		$foundData = false;
+		
+		foreach ($query->result() as $row)
+		{
+			
+			$foundData = true;
+			
+			$dataTr = $this->clearStrip( $row->treatment );
+			
+			$data = array(
+				'id' => $row->id,
+				'code' => $row->code,
+				'treatment' => $dataTr,
+				'schedule_date' => $row->schedule_date,
+				'username' => $row->username,
+				'full_name' => $this->getFullname($row->username),
+				'status' => $row->status,
+				'created_date' => $row->created_date
+			);
+			
+			$endResult['multi_data'] = $data;
+		}
+		
+		if($foundData){
+			$endResult['status'] = 'valid';
+		}
+		
+		return $endResult;
+		
 	}
 	
 	public function add($code, $treatment, $schedule_date,
@@ -117,6 +183,16 @@ class BookingRequestModel extends CI_Model {
 		]);
  }
 	
+	private function clearStrip($data){
+		// we clear everything so it's safer to be consumed by
+			// the next generation
+			$dt = $this->reverse_mysqli_real_escape_string($data);
+			$dt = stripslashes($dt);
+			$dt = json_decode($dt);
+			
+			return $dt;
+	}
+	
 	public function getAll(){
 		
 		$endResult = $this->generateRespond('invalid');
@@ -127,11 +203,7 @@ class BookingRequestModel extends CI_Model {
 		{
 			$endResult['status'] = 'valid';
 			
-			// we clear everything so it's safer to be consumed by
-			// the next generation
-			$dataTreatment = $this->reverse_mysqli_real_escape_string($row->treatment);
-			$dataTreatment = stripslashes($dataTreatment);
-			$dataTreatment = json_decode($dataTreatment);
+			$dataTreatment = $this->clearStrip($row->treatment);
 			
 			
 			$data = array(
@@ -156,20 +228,60 @@ class BookingRequestModel extends CI_Model {
 		
 	}
 	
-	
-	public function getAllSpecific($usernameIn){
+	public function getFamilyUsernames($usernameIncharge){
 		
-		$endResult = $this->generateRespond('invalid');
+		// query first from the table family
+		$checker = array(
+			'username_incharge' => $usernameIncharge
+		);
+		
+		
+		$query = $this->db->get_where('rth_family_users', $checker);
+		
+		$fullnamesFound = array();
+		$usernameFound = array();
+		
+		foreach ($query->result() as $row)
+		{
+			$fullnamesFound [] = $row->full_name;
+		}
+		
+		$i=0;
+		for($i=0; $i<count($fullnamesFound); $i++){
+			
+			// pick from table users
+			$checker = array(
+				'full_name' => $fullnamesFound[$i]
+			);
+			
+			// pick from table users
+			$query = $this->db->get_where('rth_users', $checker);
+			
+			foreach ($query->result() as $row)
+			{
+				$usernameFound [] = $row->username;
+			}
+			
+		}
+		
+		
+		// return back to getallspecific
+		return $usernameFound;
+		
+	}
+	
+	private function getAllBooking($username){
+		
+		$allData = array();
 		
 		$checker = array(
-			'username' => $usernameIn
+			'username' => $username
 		);
 		
 		$query = $this->db->get_where('rth_booking_request', $checker);
 		
 		foreach ($query->result() as $row)
 		{
-			$endResult['status'] = 'valid';
 			
 			// we clear everything so it's safer to be consumed by
 			// the next generation
@@ -189,7 +301,43 @@ class BookingRequestModel extends CI_Model {
 				'modified_date' 	=> $row->modified_date
 			);
 			
-			$endResult['multi_data'][] = $data;
+			$allData [] = $data;
+		}
+		
+		return $allData;
+	}
+	
+	public function getAllSpecific($usernameIn, $includeFamily){
+		
+		$endResult = $this->generateRespond('invalid');
+		
+		$hasilPertama = $this->getAllBooking($usernameIn);
+		$hasillBerikutnya = array();
+		
+		if($includeFamily){
+			$listFamilyUsername = $this->getFamilyUsernames($usernameIn);
+			
+			for($i=0; $i<count($listFamilyUsername); $i++){
+				$dataObtained = $this->getAllBooking($listFamilyUsername[$i]);
+				
+				for($x=0; $x<count($dataObtained); $x++){
+				$hasillBerikutnya[] = $dataObtained[$x];
+				}
+			}
+			
+			// extract to hasilpertama
+			for($i=0; $i<count($hasillBerikutnya); $i++){
+				$hasilPertama [] = $hasillBerikutnya[$i];
+			}
+			
+		}
+		
+		if(count($hasilPertama)>0){
+			$endResult['status'] = 'valid';
+			
+			for($i=0; $i<count($hasilPertama); $i++){
+				$endResult['multi_data'] [] = $hasilPertama[$i];
+			}
 		}
 		
 		if($endResult['status'] == 'invalid'){

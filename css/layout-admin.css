@@ -1,0 +1,41 @@
+
+.ui-block-c textarea{
+	display:none;
+}
+
+.next-button, .today-button, .prev-button{
+	border-radius: 5px;
+	border-style: groove !important;
+}
+
+.next-button:hover, .today-button:hover, .prev-button:hover{
+	background-color: yellow;
+	cursor: pointer;
+}
+
+#calendar-error{
+	color: red;
+	font-weight: bold;
+	display: none;
+}
+
+.day-full{
+	background-color: red;
+	border-radius: 5px;
+	color: orange;
+	font-weight: bold;
+}
+
+.day-filled{
+	background-color: orange;
+	border-radius: 5px;
+	color: white;
+	font-weight: bold;
+}
+
+.day-ruqyah{
+	background-color: pink;
+	border-radius: 5px;
+	color: black;
+	font-weight: bold;
+}

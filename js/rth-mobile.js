@@ -10,8 +10,10 @@ var pakaiEmail = true;
 var anggotaNa = false;
 var jumlahAnggota = 0;
 var namaAnggotaTerapiList = [];
+var antrianBooking = 0;
 var modeOrangBerangkat = ""; 
-var jumlahJamTersedia = 0;
+var jumlahJamTersedia = 5;
+var jumlahJamTerpakai = 0;
 // modeOrangBerangkat can be :
 // 1. saya-sendiri
 // 2. anggota-saja
@@ -39,6 +41,7 @@ $(document).ready(function(){
 	clickEventTanpaEmail();
 	clickEventPilihAnggotaAtauLangsungTerapi();
 	clickEventPilihAnggotaSelesai();
+	clickEventDetailBooking();
 	
 	setTimeout(nextPage1, 3000);
 	
@@ -160,10 +163,6 @@ function clickEventPilihTanggal(){
 	
 }
 
-function apakahMuncul (namaID){
-	var nama = "#" + namaID;
-	return $(nama).is(":hidden");
-}
 
 function clickEventTanpaEmail(){
 	
@@ -203,16 +202,16 @@ function clickEventPilihAnggotaAtauLangsungTerapi(){
 			pilihNamaAnggota = false; 
 		}else{
 			pilihNamaAnggota = true;
-			
-			// we add his name if he also go together
-			if(terpilih == 'saya-bersama-anggota'){
+		}
+		
+		// we add his name if he also go together
+		if(terpilih == 'saya-bersama-anggota' || 
+		terpilih == 'saya-sendiri' ){
 				var orang = {};
 				orang.full_name = fullname_sembunyi;
 				orang.username = username_sembunyi;
 			
 				namaAnggotaTerapiList.push(orang);
-			}
-			
 		}
 		
 		
@@ -289,6 +288,16 @@ function clickEventAllBooking(){
 	
 	$("#link-page-riwayat").click(function() {
 	
+	
+		// we include family check if any booking true
+		
+		kiriman = {
+			username : username_sembunyi,
+			family: true
+		};
+		
+		//console.log('all booking untuk ' + JSON.stringify(kiriman));
+	
 		refreshDataTable();
 		
 		tampilin('riwayat-loading');
@@ -297,9 +306,7 @@ function clickEventAllBooking(){
 		
 		$.mobile.changePage("#page-riwayat");
 		
-		kiriman = {
-			username : username_sembunyi
-		};
+		
 		
 		//console.log('kirim dulu ' + JSON.stringify(kiriman));
 		
@@ -396,8 +403,8 @@ function refreshDataPilihanBooking(){
 	
 	// hide semua tombol, warning-booking
 	// lalu munculkan loading
-	tampilin('pilihan-loading');
-		sembunyiParentDiv('.tombol-booking');
+		tampilin('pilihan-loading');
+		//sembunyiParentDiv('.tombol-booking');
 		sembunyi('warning-booking');
 	
 	// the data tobe passed into server	
@@ -433,7 +440,7 @@ function aktifinTombolJam(data){
 	var dataJSON = JSON.parse(n);
 	
 	// reset counter
-	jumlahJamTersedia = 0;
+	jumlahJamTersedia = 5;
 	
 	var i=0;
 	for(i = 0; i<dataJSON.multi_data.length; i++){
@@ -469,15 +476,7 @@ function setKetersediaan(jm, st){
 	
 }
 
-function tambahJamTersedia(){
-	if(jumlahJamTersedia<5)
-	jumlahJamTersedia++;
-}
 
-function kurangiJamTersedia(){
-	if(jumlahJamTersedia>0)
-	jumlahJamTersedia--;
-}
 
 function tersedia(angka, stat){
 	
@@ -485,13 +484,20 @@ function tersedia(angka, stat){
 	var tombol = '#jam' + angka + ' .tombol-booking';
 	
 			if(stat == 0){
-				$(sel).text("-");
-				sembunyiParentDiv(tombol);
-				kurangiJamTersedia();
+				$(sel).text("TERPAKAI");
+				$(sel).addClass('red');
+				$(sel).removeClass('bold');
+				
+				//sembunyiParentDiv(tombol);
+				jumlahJamTerpakai++;
+				
+				jumlahJamTersedia -= jumlahJamTerpakai;
 			}else {
 				$(sel).text("TERSEDIA");
-				tampilinParentDiv(tombol);
-				tambahJamTersedia();
+				//tampilinParentDiv(tombol);
+				
+				$(sel).addClass('bold');
+				$(sel).removeClass('red');
 			}
 }
 
@@ -561,6 +567,58 @@ function grabDataJumlahAnggotaServer(){
 	
 }
 
+function grabDataBookingDetailServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/booking/detail',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						// we set the number of family
+						var n = JSON.stringify(result);
+						var dataJSON = JSON.parse(n);
+						
+						var data = dataJSON.multi_data;
+						var c = data.code;
+						var sc = data.schedule_date;
+						var fname = data.full_name;
+						// extract data
+						
+						$('#booking-detail-code').text(c);
+						$('#booking-detail-schedule-date').text(konversiAsHuman(sc));
+						$('#booking-detail-fullname').text(fname);
+						
+						console.log('kita ada ' + JSON.stringify(data));
+						
+						var tr  = "<b>Untuk Treatment:</b> <br>";
+						tr += extractTreatment(data);
+						tr = tr.replaceAll("ENTER", "<br>");
+						
+						$('#booking-detail-treatment').html(tr);
+						
+						tampilin('booking-detail-data');
+						sembunyi('booking-detail-loading');
+						
+					}else{
+						// tampilkan error
+						
+					}
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
 function grabDataProfilServer(){
 	
 	// request data from server
@@ -592,6 +650,8 @@ function grabDataProfilServer(){
 	
 }
 
+
+
 function grabDataSchedulesServer(){
 	
 	// request data from server
@@ -608,7 +668,7 @@ function grabDataSchedulesServer(){
 						aktifinTombolJam(result);
 						
 					}else{
-						sembunyiParentDiv('.tombol-booking');
+						//sembunyiParentDiv('.tombol-booking');
 						tampilin('warning-booking');
 					}
 					
@@ -820,6 +880,8 @@ function pilihJam(){
 	
 	$(".tombol-booking").click(function() {
 	
+		//alert('a');
+		
 		var jam =	$(this).attr('data-jam');
 		collectBookingOrder(jam);
 		
@@ -829,12 +891,22 @@ function pilihJam(){
 
 
 function collectBookingOrder(jamMasuk){
+	
+	// deteksi mode booking dari sederet nama
+	var i = 0;
+	var postData = {};
 	var codeNa =	generateRandomString(4) + "-" + generateRandomString(3);
 	
-	var usernameNa = username_sembunyi;
-	var fullNa = fullname_sembunyi;
-	var schedDate = $('#pilih-tanggal').val();
+	console.log('ada datanya ' + namaAnggotaTerapiList.length);
 	
+	for(i = 0; i < namaAnggotaTerapiList.length ; i++) {
+	
+	//var usernameNa = username_sembunyi;
+	//var fullNa = fullname_sembunyi;
+	var usernameNa 	= namaAnggotaTerapiList[i].username;
+	var fullNa 		= namaAnggotaTerapiList[i].full_name;
+	
+	var schedDate = $('#pilih-tanggal').val();
 	
 	jadwal_sembunyi = $('#pilih-tanggal option:selected').text();
 	jadwal_sembunyi += " " + jamMasuk;
@@ -861,11 +933,9 @@ function collectBookingOrder(jamMasuk){
 	
 	//var dataTreatement = JSON.stringify(objTreatment);
 	
-	
-	
 	//alert(dataTreatement);
 	// lets create the post data
-	var postData = {
+	postData = {
 		username : usernameNa,
 		code : codeNa,
 		fullname : fullNa,
@@ -874,9 +944,13 @@ function collectBookingOrder(jamMasuk){
 		human_date : jadwal_sembunyi
 	};
 	
-	console.log(postData);
+	console.log('kirimkan ' + postData);
 	
 	postDataBookingRequest(postData, codeNa, jadwal_sembunyi );
+	
+	
+	}
+	
 	
 }
 
@@ -942,7 +1016,9 @@ function extractDataToTable(dataCome){
 		var encloser1a = "<div class='ui-grid-c data-table-cell'>";
 		var encloser1b = "</div>";
 		
-		var code = "<div class='ui-block-a treatment-code'>" + isiNa[p].code + "</div>";
+		var linkCode = "<a href='#page-booking-detail' data-transition='flip' data-id='"+ isiNa[p].id +"'>" + isiNa[p].code + "</a>";
+		
+		var code = "<div class='ui-block-a treatment-code'>" + linkCode + "</div>";
 		var sdate = "<div class='ui-block-b treatment-schedule-date' hidden>" + isiNa[p].schedule_date + "</div>";
 		
 		var tglManusiawi = konversiAsHuman(isiNa[p].schedule_date);
@@ -956,7 +1032,7 @@ function extractDataToTable(dataCome){
 			stat = "<div class='ui-block-c'>" + logoOK + "</div>";
 		}
 		
-		var btn = "<input type='button' value='Batal' class='treatment-cancel' data-inline='true' />";
+		var btn = "<a href='#' class='treatment-cancel' data-inline='true' >Batalkan</a>";
 		
 		if(isiNa[p].status != "pending"){
 			btn = "";
@@ -1180,6 +1256,56 @@ function asHumanSadMessage(dataObject){
 	return pesanAkhir;
 }
 
+function asGroupMessage(dataObject){
+	
+	var pesanAkhir = ""; 
+	var nLine = "ENTER";
+	
+	var kode = dataObject.code;
+	var jadwal = dataObject.human_date;
+	var treatmentPilihan = extractTreatment(dataObject);
+	
+	pesanAkhir = "Hello *admin RTH!*" + nLine;
+	
+	if(modeOrangBerangkat == 'saya-sendiri'){
+				pesanAkhir += "saya ";
+	}else if(modeOrangBerangkat == 'anggota-saja'){
+				pesanAkhir += "anggota saya : " + nLine;
+	}else if(modeOrangBerangkat == 'saya-bersama-anggota'){
+				pesanAkhir += "kami semua : " + nLine;
+	}
+	
+	var i = 0;
+	for(i = 0; i<namaAnggotaTerapiList.length; i++){
+	
+	var namaPenuh = namaAnggotaTerapiList[i].full_name;
+	
+	
+			
+		if(modeOrangBerangkat == 'saya-sendiri'){
+					pesanAkhir += "*" + namaPenuh + "*" + nLine;
+		}else if(modeOrangBerangkat == 'anggota-saja'){
+			
+					if(namaAnggotaTerapiList.length>1){
+						pesanAkhir += "- *" + namaPenuh + "*" + nLine;
+					}else{
+						pesanAkhir += "*" + namaPenuh + "*" + nLine;
+					}
+					
+		}else if(modeOrangBerangkat == 'saya-bersama-anggota'){
+					pesanAkhir += "- *" + namaPenuh + "*" + nLine;
+		}	
+					
+	}				
+	
+	pesanAkhir += " sudah booking dengan *Kode : " + kode +"* "+ nLine +
+				"untuk *Jadwal : " + jadwal + "* dengan tindakan *Treatment :* " + nLine +
+				treatmentPilihan + "."  + nLine + 
+				"  mohon dikonfirmasi, *apakah bisa?*";
+	
+	return pesanAkhir;
+}
+
 function asHumanMessage(dataObject){
 	
 	var kode = dataObject.code;
@@ -1190,8 +1316,8 @@ function asHumanMessage(dataObject){
 	var nLine = "ENTER";
 	var pesanAkhir = "Hello *admin RTH!*" + nLine +
 				"saya *" + namaPenuh + "* sudah booking dengan *Kode : " + kode +"* "+ nLine +
-				"untuk jadwal *" + jadwal + "* dengan tindakan *Treatment :* " + nLine +
-				treatmentPilihan + "." + nLine + nLine + 
+				"untuk *Jadwal : " + jadwal + "* dengan tindakan *Treatment :* " + nLine +
+				treatmentPilihan + "."  + nLine + 
 				"  mohon dikonfirmasi, *apakah bisa?*";
 					
 	
@@ -1209,6 +1335,19 @@ function goToWhatsappKontak(){
 	console.log("WHATSAPP : " + url);
 	return url;
 	
+}
+
+
+function goToWhatsappBanyakan(dataObject){
+	
+	var message = asGroupMessage(dataObject);
+	
+	var pesan = encodeURI(message).replaceAll("ENTER", "%0a");
+	var nomerAdmin = "6285871341474";
+	//https://api.whatsapp.com/send?phone=whatsappphonenumber&text=urlencodedtext
+	var url = "https://api.whatsapp.com/send?phone=" + nomerAdmin + "&text=" + pesan;
+	console.log("WHATSAPP : " + url);
+	return url;
 }
 
 function goToWhatsapp(dataObject){
@@ -1242,6 +1381,15 @@ function updateSuccess(codeNa, tglNa){
 	
 }
 
+var tempObj = {};
+function visitWhatsappSendiri(){
+	window.parent.location.href = goToWhatsapp(tempObj);
+}
+
+function visitWhatsappBanyakan(){
+	window.parent.location.href = goToWhatsappBanyakan(tempObj);
+}
+
 function postDataBookingRequest(dataObject, codeNa, tglNa ){
 	
 		$.ajax({
@@ -1256,13 +1404,28 @@ function postDataBookingRequest(dataObject, codeNa, tglNa ){
 						
 						$.mobile.changePage("#page-booking-success");
 						
-						window.parent.location.href = goToWhatsapp(dataObject);
+						// update the counter for last making whatsapp message
+						antrianBooking++;
+						
+						if(antrianBooking == namaAnggotaTerapiList.length){
+							// jika tlah mencapai angkanya
+							// maka kita create pesan whatsapp
+							tempObj = dataObject;
+							
+							if(modeOrangBerangkat == 'saya-sendiri'){
+								setTimeout(visitWhatsappSendiri, 3000);
+							}else{ 
+								setTimeout(visitWhatsappBanyakan, 3000);
+							}
+						}
+						
 						
 						updateSuccess(codeNa, tglNa);
+						
 					
 					}else{
 						$.mobile.changePage("#page-booking-failed");
-						console.log(JSON.stringify(result));
+						console.log('error karena ' + JSON.stringify(result));
 					}
 					
 					
@@ -1663,6 +1826,29 @@ function konversiAsHuman(computerDate){
 	
 	return hasil;
 	
+}
+
+function clickEventDetailBooking(){
+	
+		 $(document).on("click", ".treatment-code a" , function() {
+			 
+			 var codeNa = $(this).text();
+			 var noID = $(this).attr('data-id');
+			 
+			 kiriman = {};
+			 kiriman.code = codeNa;
+			 kiriman.id = noID;
+			 
+			 //console.log('akan kirimkan treatment code ' + JSON.stringify(kiriman));
+			 
+			 sembunyi('booking-detail-data');
+			 tampilin('booking-detail-loading');
+			 
+			 setTimeout(grabDataBookingDetailServer, 2000);
+			 
+			 
+		 });
+		 
 }
 
 function clickEventCancelBooking(){
