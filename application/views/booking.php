@@ -49,7 +49,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div id="container" class="content" data-role="content" >
 	<h3>Akses Login</h3>
 	<img src="/images/logo.png"/>
-	<form id="form-login" action="" method="post" data-ajax="false" >
+	<form id="form-login" method="post" data-ajax="false" >
 	
 	<div data-role="fieldcontain">
 	<label for="username">Email atau nomor hp:</label>
@@ -143,7 +143,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</div>
 	
 	<div data-role="fieldcontain">
-	<label for="profil_date_created">Tanggal Mendaftar:</label>
+	<label >Tanggal Mendaftar:</label>
 	<span id="profil_date_created"> </span>
 	</div>
 	
@@ -199,6 +199,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
 
+<section id="page-pilih-anggota-terapi" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Pilihan Anggota</h1></header>
+<div id="container" class="content" data-role="content" >
+	<h3>Nama Anggota yang ingin Terapi :</h3>
+	
+	<fieldset id="fset-anggota-terapi" data-role="controlgroup">
+	<legend >Centang 1 atau beberapa pilihan:</legend>
+	
+	</fieldset>
+	
+	
+	
+	<a href="#page-pilih-tanggal" data-inline="true" data-role="button">kembali &#60;&#60;</a>
+	
+	<a id="link-pilih-anggota-selesai" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+
 <section id="page-pilih-anggota" data-role="page">
 <header data-role="header" data-position="fixed"><h1>Pilihan Peserta Therapy</h1></header>
 <div id="container" class="content" data-role="content" >
@@ -215,7 +236,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</fieldset>
 	<a href="#page-pilih-tanggal" data-inline="true" data-role="button">kembali &#60;&#60;</a>
 	
-	<a id="link-pilihan-terapi" href="" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
+	<a id="link-setelah-pilih-anggota" href="" data-inline="true" data-role="button">&#62;&#62; selanjutnya</a>
 	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -306,31 +327,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	
 	<div class="ui-grid-b" id="jam8">
 		<div class="ui-block-a">08:00</div>
-		<div class="ui-block-b"><span class="status">Tersedia</span></div>
+		<div class="ui-block-b"><span class="status">-</span></div>
 		<div class="ui-block-c"><input class="tombol-booking" data-jam="08:00" type="button" value="booking" /></div>
 	</div>
 	
 	<div class="ui-grid-b" id="jam10" >
 		<div class="ui-block-a">10:00</div>
-		<div class="ui-block-b"><span class="status">Tersedia</span></div>
+		<div class="ui-block-b"><span class="status">-</span></div>
 		<div class="ui-block-c"><input class="tombol-booking" data-jam="10:00" type="button" value="booking" /></div>
 	</div>
 	
 	<div class="ui-grid-b" id="jam13" >
 		<div class="ui-block-a">13:00</div>
-		<div class="ui-block-b"><span class="status">Tersedia</span></div>
+		<div class="ui-block-b"><span class="status">-</span></div>
 		<div class="ui-block-c"><input class="tombol-booking" data-jam="13:00" type="button" value="booking" /></div>
 	</div>
 	
 	<div class="ui-grid-b" id="jam16" >
 		<div class="ui-block-a">16:00</div>
-		<div class="ui-block-b"><span class="status">Tersedia</span></div>
+		<div class="ui-block-b"><span class="status">-</span></div>
 		<div class="ui-block-c"><input class="tombol-booking" data-jam="16:00" type="button" value="booking" /></div>
 	</div>
 	
 	<div class="ui-grid-b" id="jam20" >
 		<div class="ui-block-a">20:00</div>
-		<div class="ui-block-b"><span class="status">Tersedia</span></div>
+		<div class="ui-block-b"><span class="status">-</span></div>
 		<div class="ui-block-c"><input class="tombol-booking" data-jam="20:00" type="button" value="booking" /></div>
 	</div>
 	
@@ -630,7 +651,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<img src="/images/ask.png"/>
 	<p>Input email saat pertama kali mendaftar untuk me-reset password:</p>
 	
-	<form id="form-reset" action="" method="post" data-ajax="false" >
+	<form id="form-reset" method="post" data-ajax="false" >
 	
 	<div data-role="fieldcontain">
 	<label for="reset_email">Email</label>

@@ -9,7 +9,13 @@ var kiriman = "";
 var pakaiEmail = true;
 var anggotaNa = false;
 var jumlahAnggota = 0;
-
+var namaAnggotaTerapiList = [];
+var modeOrangBerangkat = ""; 
+var jumlahJamTersedia = 0;
+// modeOrangBerangkat can be :
+// 1. saya-sendiri
+// 2. anggota-saja
+// 3. saya-bersama-anggota	
 
 $(document).ready(function(){
 
@@ -31,7 +37,8 @@ $(document).ready(function(){
 	clickEventDaftarkanAnggota();
 	clickEventDaftarkanTunggal();
 	clickEventTanpaEmail();
-	
+	clickEventPilihAnggotaAtauLangsungTerapi();
+	clickEventPilihAnggotaSelesai();
 	
 	setTimeout(nextPage1, 3000);
 	
@@ -43,7 +50,6 @@ $(document).ready(function(){
 	formProfilValidation();
 	
 	aktifkanLinkKontakAdmin();
-	
 	aktifkanPilihanSiapaTerapi();
 	
 	pilihJam();
@@ -67,6 +73,40 @@ function clearFormLogin(){
 	
 	$("#form-login").each(function(){this.reset();});
 	
+}
+
+function clickEventPilihAnggotaSelesai(){
+	
+	
+	$("#link-pilih-anggota-selesai").click(function() {
+	
+		// we clear all array item except the 1 one
+		if(modeOrangBerangkat != 'saya-sendiri'){
+			namaAnggotaTerapiList.splice(1);
+		}
+	
+		// kumpulin nama username anggota yg terpilih
+		// karena akan disatukan pada email nantinya diserver
+		$('#fset-anggota-terapi input:checkbox:checked').each(function () {
+			
+			var fname = $(this).attr('fullname');
+			var usname = $(this).attr('username');
+			
+			var orang = {};
+			orang.full_name = fname;
+			orang.username = usname;
+			
+			if(!namaAnggotaTerapiList.includes(orang)){
+				namaAnggotaTerapiList.push(orang);
+			}
+			
+			console.log('orang yg mo ikut '+ JSON.stringify(namaAnggotaTerapiList));
+			
+				$.mobile.changePage("#page-pilih-terapi");	
+			
+		});
+	
+	});
 }
 
 function aktifkanPilihanSiapaTerapi(){
@@ -146,13 +186,61 @@ function clickEventTanpaEmail(){
 	
 }
 
+function clickEventPilihAnggotaAtauLangsungTerapi(){
+	
+	
+	$("#link-setelah-pilih-anggota").click(function() {
+	
+		// pilih dulu nama anggota?
+		var pilihNamaAnggota = false;
+		var terpilih  = $('#pilih_anggota_siapa').val();
+		
+		modeOrangBerangkat = terpilih;
+		// renewal the list
+		namaAnggotaTerapiList = [];
+		
+		if(terpilih == 'saya-sendiri'){
+			pilihNamaAnggota = false; 
+		}else{
+			pilihNamaAnggota = true;
+			
+			// we add his name if he also go together
+			if(terpilih == 'saya-bersama-anggota'){
+				var orang = {};
+				orang.full_name = fullname_sembunyi;
+				orang.username = username_sembunyi;
+			
+				namaAnggotaTerapiList.push(orang);
+			}
+			
+		}
+		
+		
+		if(!pilihNamaAnggota){
+			$.mobile.changePage("#page-pilih-terapi");	
+		}else{
+			
+			
+			// grab data from server to know who the family members
+			kiriman = {};
+			kiriman.username_incharge = username_sembunyi;
+			
+			grabDataAnggotaTerapiServer();
+			$.mobile.changePage("#page-pilih-anggota-terapi");	
+		}
+		
+		
+		
+		
+	});
+}
+
 function clickEventPilihJadwalTerapi(){
 	
 	
 	$("#link-pilihan-terapi").click(function() {
 	
 		refreshDataPilihanBooking();
-		
 		
 		$.mobile.changePage("#page-pilih-jam");
 		
@@ -320,8 +408,8 @@ function refreshDataPilihanBooking(){
 	
 	//alert('akan kirim '  + JSON.stringify(kiriman));
 	
-	// grab data after 3 seconds
-	setTimeout( grabDataSchedulesServer, 3000);
+	// grab data after 2 seconds
+	setTimeout( grabDataSchedulesServer, 2000);
 	
 }
 
@@ -339,10 +427,72 @@ function refreshDataTable(){
 	
 }
 
-function aktifinTombolJam(dataJSON){
+function aktifinTombolJam(data){
+	
+	var n = JSON.stringify(data);
+	var dataJSON = JSON.parse(n);
+	
+	// reset counter
+	jumlahJamTersedia = 0;
+	
+	var i=0;
+	for(i = 0; i<dataJSON.multi_data.length; i++){
+		
+		var jam = dataJSON.multi_data[i].specific_hour;
+		var stat = dataJSON.multi_data[i].status;
+		
+		setKetersediaan(jam, stat);
+		
+	}
+	
+	if(jumlahJamTersedia==0){
+		tampilin('warning-booking');
+	}
 	
 	
+}
+
+function setKetersediaan(jm, st){
 	
+	if(jm == '08:00'){
+			tersedia(8, st);
+	}else if(jm == '10:00'){
+			tersedia(10, st);
+	}else if(jm == '13:00'){
+			tersedia(13, st);
+	}else if(jm == '16:00'){
+			tersedia(16, st);
+	}else if(jm == '20:00'){
+			tersedia(20, st);
+	}
+	
+	
+}
+
+function tambahJamTersedia(){
+	if(jumlahJamTersedia<5)
+	jumlahJamTersedia++;
+}
+
+function kurangiJamTersedia(){
+	if(jumlahJamTersedia>0)
+	jumlahJamTersedia--;
+}
+
+function tersedia(angka, stat){
+	
+	var sel = '#jam'+ angka + ' .status';
+	var tombol = '#jam' + angka + ' .tombol-booking';
+	
+			if(stat == 0){
+				$(sel).text("-");
+				sembunyiParentDiv(tombol);
+				kurangiJamTersedia();
+			}else {
+				$(sel).text("TERSEDIA");
+				tampilinParentDiv(tombol);
+				tambahJamTersedia();
+			}
 }
 
 function opsiTerapiBersamaAnggota(tampilkan){
@@ -534,6 +684,37 @@ function grabDataAnggotaServer(){
 						sembunyi('anggota-loading');
 					
 					
+					//console.log(result);
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function grabDataAnggotaTerapiServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/family/all',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						extractDataAnggotaCheckbox(result);
+						
+					}else{
+						
+						$.mobile.changePage("#page-pilih-anggota");
+					
+					}
 					//console.log(result);
 					
                 },
@@ -878,6 +1059,51 @@ function extractDataAnggotaTable(dataCome){
 		var combined = encloser1a + cdate + fname + hub + hapus + encloser1b;
 		
 		$(combined).insertAfter("#anggota-table-head");
+		
+	}
+	
+}
+
+function extractDataAnggotaCheckbox(dataCome){
+	
+	var n = JSON.stringify(dataCome);
+    var data = JSON.parse(n); // Try to parse the response as JSON
+	
+	var head = "<legend id='legend-anggota-terapi'>Centang 1 atau beberapa pilihan:</legend>";
+	
+	$("#fset-anggota-terapi").text('');
+	$("#fset-anggota-terapi").append(head);
+	
+	var isiNa = data.multi_data;
+	var p = 0;
+	for(p = 0; p < isiNa.length; p++){
+		//console.log(isiNa[p]);
+		/*
+		CREATING NEW INPUT AND LABEL BELOW THIS ONE
+		<legend id="legend-anggota-terapi">Centang 1 atau beberapa pilihan:</legend>
+	
+		<input type="checkbox" name="checkbox-nama-anggota" data-anggota-fullname="" data-anggota-id="" data-anggota-username="" class="checkbox-nama-anggota" />
+		<label>Nama Fulan</label>
+		
+		*/
+		
+		
+		var usernameRapet =  isiNa[p].full_name.replace(/\s/g, '');
+		
+		var chk = "<input type='checkbox' " +
+		"id='checkbox-anggota-" + p +"' " +
+		"name='checkbox-anggota-" + p +"' " +
+		"fullname='" + isiNa[p].full_name+"' " +
+		"username='" + usernameRapet + "' "+
+		 "/>";
+		
+		var lbl = "<label for='checkbox-anggota-"+p+"'>"+isiNa[p].full_name+"</label>";
+		
+		var combined = chk + lbl;
+		
+		$("#fset-anggota-terapi").append(combined);
+		$("#fset-anggota-terapi").enhanceWithin();
+		
 		
 	}
 	
@@ -1576,6 +1802,21 @@ function tampilin(idNa){
 	}
 	
 	$(namina).show();
+}
+
+function tampilinParentDiv(idNa){
+	
+	var namina = "";
+	
+	if(!idNa.includes('#') && !idNa.includes('.')){
+	
+		namina = '#' + idNa;
+	
+	}else{
+		namina = idNa;
+	}
+	
+	$(namina).parent().show();
 }
 
 function toggleAllTindakan(){
