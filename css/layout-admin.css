@@ -3,20 +3,36 @@
 	display:none;
 }
 
-.next-button, .today-button, .prev-button{
+.next-button, .today-button, .prev-button, .auto-fill-button{
 	border-radius: 5px;
 	border-style: groove !important;
+	margin-left: 20px;
 }
 
-.next-button:hover, .today-button:hover, .prev-button:hover{
+.next-button:hover, .today-button:hover, .auto-fill-button:hover, .prev-button:hover{
 	background-color: yellow;
 	cursor: pointer;
+}
+
+.calendar-loading{
+	background: url('/images/loading.gif') no-repeat;
+	
 }
 
 #calendar-error{
 	color: red;
 	font-weight: bold;
 	display: none;
+}
+
+.pesan-error{
+	color: red;
+	font-weight: bold;
+}
+
+.pesan-loading{
+	color: black;
+	font-weight: bold;
 }
 
 .day-full{
@@ -38,4 +54,24 @@
 	border-radius: 5px;
 	color: black;
 	font-weight: bold;
+}
+
+.auto-fill-button{
+	margin: 0 auto;
+    background: transparent;
+    border: none;
+    padding: 5px;
+}
+
+.day-0{
+	border: groove;
+	background-color: white;
+	border-radius: 15px;
+	color: black;
+	font-weight: bold;
+}
+
+.tengah-medium{
+	width: 65%;
+	margin: auto;
 }

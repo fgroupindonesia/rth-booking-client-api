@@ -156,7 +156,8 @@ class ScheduleModel extends CI_Model {
 		
 	}
 	
-	// get several data from specific date & gender
+	// get 5 data from specific date & gender
+	// because from 08", 10", 13", 16", and 20:00
 	public function get($date_chosen, $gender_therapist){
 		
 		$endResult = $this->generateRespond('invalid');

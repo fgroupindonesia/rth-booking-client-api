@@ -43,12 +43,12 @@ class Schedule extends CI_Controller {
 			
 	}
 	
-	// get the schedule for specific date based on 'gender_therapist'
+	// get 1 the schedule for specific date based on 'gender_therapist'
 	public function detail(){
 		
 		// gender_therapist is either one of these
+		// 0 : female
 		// 1 : male
-		// 2 : female
 		
 		$date_chosen 	= $this->input->post('date_chosen');
 		$gender_therapist 	= $this->input->post('gender_therapist');

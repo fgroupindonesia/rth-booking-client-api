@@ -111,22 +111,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </section>
 
 <section id="page-detail" data-role="page">
-<header data-role="header" data-position="fixed"><h1>Tanggal Spesifik</h1></header>
+<header data-role="header" data-position="fixed"><h1>Detail Spesifik</h1></header>
 <div  class="content" data-role="content" >
-	<h3>Tanggal : <span id="detail-tanggal" > </span></h3>
+	<h3>Tanggal : <span id="detail-tanggal" > </span>
+	<span id="detail-loading" class="pesan-loading" >Loading...</span>
+	<span id="detail-error" class="pesan-error" >Error!</span>	</h3>
+	<span id="detail-tanggal-computer" hidden>  </span>
 	
 	<div class="ui-grid-a">
 		<div class="ui-block-a">
 		<label for="flip-jam8" >08:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" id="flip-jam8" class="slider-jam" data-role="slider">
-			<option value="off">Off</option>
-			<option value="on">On</option>
+		<select name="slider" data-id="" id="flip-jam8" class="slider-jam" data-role="slider">
+			<option value="0">Off</option>
+			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea >
+		<textarea class="detail-description">
 		</textarea>
 		</div>
 	</div>
@@ -136,13 +139,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<label for="flip-jam10" >10:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" id="flip-jam10" class="slider-jam" data-role="slider">
-			<option value="off">Off</option>
-			<option value="on">On</option>
+		<select name="slider" data-id="" id="flip-jam10" class="slider-jam" data-role="slider">
+			<option value="0">Off</option>
+			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea >
+		<textarea class="detail-description" >
 		</textarea>
 		</div>
 	</div>
@@ -153,13 +156,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<label for="flip-jam13" >13:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" id="flip-jam13" class="slider-jam" data-role="slider">
-			<option value="off">Off</option>
-			<option value="on">On</option>
+		<select name="slider" data-id="" id="flip-jam13" class="slider-jam" data-role="slider">
+			<option value="0">Off</option>
+			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea >
+		<textarea class="detail-description" >
 		</textarea>
 		</div>
 	</div>
@@ -170,13 +173,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<label for="flip-jam16" >16:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" id="flip-jam16" class="slider-jam" data-role="slider">
-			<option value="off">Off</option>
-			<option value="on">On</option>
+		<select name="slider" data-id="" id="flip-jam16" class="slider-jam" data-role="slider">
+			<option value="0">Off</option>
+			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea >
+		<textarea class="detail-description" >
 		</textarea>
 		</div>
 	</div>
@@ -188,8 +191,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</div>
 		<div class="ui-block-b"> 
 		<select name="slider" id="flip-jam20" class="slider-jam" data-role="slider">
-			<option value="off">Off</option>
-			<option value="on">On</option>
+			<option value="0">Off</option>
+			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
@@ -202,7 +205,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<label></label>
 	</div>
 	
-	<a href="#page-kalendar" data-inline="true" data-role="button">Kembali</a>
+	<a href="#" id="link-kembali-kalendar" data-inline="true" data-role="button">Kembali</a>
+	<a href="#page-terapkan-serupa" data-transition="dialog" id="link-terapkan-lainnya" data-inline="true" data-role="button">Terapkan Serupa Lainnya</a>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-terapkan-serupa" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Terapkan Serupa</h1></header>
+<div  class="content" data-role="content" >
+	<h3>Duplikasi Data</span></h3>
+	<center class="tengah-medium">
+	<label for="banyak-hari-duplikasi">Berapa hari kedepan?</label>
+	<input type="range" name="banyak-hari-duplikasi" id="banyak-hari-duplikasi" 
+	min="0" max="100" value="0">
+	</center>
+	
+	<a href="#" id="link-duplikasi-apply" data-inline="true" data-role="button">Terapkan</a>
+	<a href="#page-management-booking" data-inline="true" data-role="button">Kembali</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
@@ -210,7 +230,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <section id="page-kalendar" data-role="page">
 <header data-role="header" data-position="fixed"><h1>Jadwal Keseluruhan</h1></header>
 <div  class="content" data-role="content" >
-	<h3>Kalendar <span id="calendar-error"> error!</span></h3>
+	<h3>Kalendar 
+	<span id="calendar-error"> error!</span> 
+	<span id="calendar-loading"> loading ... </span></h3>
 	<select name="slider" id="flip-gender"  data-role="slider">
 			<option value="1">Ikhwan</option>
 			<option value="0">Akhwat</option>

@@ -1,6 +1,9 @@
 var kiriman = {};
 var dataWhole = [];
 
+var data5Jam = ["08:00", "10:00", "13:00", "16:00", "20:00"];
+var batasJam = data5Jam.length;
+
 $(document).ready(function(){
 	
 	setTimeout(nextPage1, 3000);
@@ -13,11 +16,124 @@ $(document).ready(function(){
 
 function showErrorCalendar(psan){
 	tampilin('calendar-error');
+	sembunyi('calendar-loading');
 	$('#calendar-error').text(psan);
 }
 
 function hideErrorCalendar(){
 	sembunyi('calendar-error');
+}
+
+function updateDummyDataScheduleServer(tglComputer, indexNow){
+	
+	var indexJam =	indexNow;
+	
+	let myPromise = new Promise(function(myResolve, myReject) {
+	 
+		tampilin('calendar-loading');
+		sembunyi('calendar-error');
+		
+		var jam = data5Jam[indexJam];
+		addScheduleData(jam, tglComputer);
+
+	  if (indexJam < batasJam-1) {
+		indexJam++;
+		myResolve(indexJam);
+	  } else {
+		indexJam=0;
+		myReject("done");
+	  }
+	});
+
+	myPromise.then(
+	  function(value) { updateDummyDataScheduleServer(tglComputer, value);},
+	  function(error) { sembunyi('calendar-loading'); sembunyi('calendar-error'); }
+	);
+	
+}
+
+function ukuranObject(obj){
+        return Object.keys(obj).length;
+}
+
+function addScheduleData(jamMasuk, tglComputer){
+	
+	kiriman = {};
+	kiriman.date_chosen = tglComputer;
+	kiriman.specific_hour = jamMasuk;
+	kiriman.status = 0; // default is OFF which is 0
+	kiriman.description = ""; // default is empty
+	kiriman.gender_therapist = $('#flip-gender').val();
+	
+	// kalau data sudah ready dlm 5 key format properties baru
+	// maka boleh kirim deh
+	if(ukuranObject(kiriman)==5){
+	
+	console.log('kirim dummy ' + JSON.stringify(kiriman));
+	
+	$.ajax({
+                type: 'POST',
+                url: '/schedule/add',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+					}
+					grabDataScheduleServer();	
+                },
+                error : function(error) {
+					
+                }
+    });
+	
+	}
+	
+}
+
+function grabDataScheduleSpecificServer(){
+	
+	var genderna = $('#flip-gender').val();
+	var tgl = $('#detail-tanggal-computer').val();
+	
+	kiriman = {};
+	kiriman.date_chosen = tgl;
+	kiriman.gender_therapist = genderna;
+	
+	//console.log('kirimin ' + JSON.stringify(kiriman));
+	
+	$.ajax({
+                type: 'POST',
+                url: '/schedule/detail',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						extractDataToDetail(result);
+						
+						sembunyi('detail-error');
+						tampilin('detail-loading');
+					}else{
+						
+						tampilin('detail-error');
+						sembunyi('detail-loading');
+						
+						console.log(JSON.stringify(result));
+						
+					}
+					
+                },
+                error : function(error) {
+						tampilin('detail-error');
+						sembunyi('detail-loading');
+                }
+    });
+	
 }
 
 function grabDataScheduleServer(){
@@ -32,7 +148,7 @@ function grabDataScheduleServer(){
 	kiriman.month_year = moment(bulanTahunNempel, formatNa).format('MMMM YYYY').toLowerCase();
 	kiriman.gender_therapist = genderna;
 	
-	console.log('kirimin ' + JSON.stringify(kiriman));
+	//console.log('kirimin ' + JSON.stringify(kiriman));
 	
 	$.ajax({
                 type: 'POST',
@@ -43,15 +159,17 @@ function grabDataScheduleServer(){
 					
 					// check validity
 					if(checkValidity(result)){
-						console.log('untuk schedule' + JSON.stringify(result));
+						//console.log('untuk schedule' + JSON.stringify(result));
 						extractDataToCalendar(result);
 						hideErrorCalendar();
 					}else{
 						// if error
-						console.log('error for updating calendar !\n' + result);
+						//console.log('error for updating calendar !\n' + result);
 						showErrorCalendar("data not found!");
 						// remove all marks on calendar if any
 						clearCalendar();
+						
+						console.log(JSON.stringify(result));
 						
 					}
 					
@@ -63,7 +181,51 @@ function grabDataScheduleServer(){
 	
 }
 
+function autoFillData(angkaMasuk){
+	
+	// from 1 date of this month
+	// until 30 end of this month
+	var blnTahun = $('.month-container').text();
+	var formatNa = "MMMMYYYY";
+	var startDayMonth = moment(blnTahun, formatNa).startOf('month');
+	var lastDayMonth = moment(blnTahun, formatNa).endOf('month').format('DD');
+	
+	var hariKe = angkaMasuk;
+		
+		let myPromise = new Promise(function(myResolve, myReject) {
+		
+			var dateGiven = moment(startDayMonth).add(hariKe, 'days').format('YYYY-MM-DD');
+			
+			updateDummyDataScheduleServer(dateGiven, 0);
+		
+			if(hariKe < lastDayMonth){
+				hariKe++;
+				myResolve(hariKe);
+			}else{
+				myReject('done');
+			}
+		
+		});
+
+		// "Consuming Code" (Must wait for a fulfilled Promise)
+		myPromise.then(
+		  function(value) { autoFillData(value); },
+		  function(error) { /* code if some error */ }
+		);
+	
+}
+
 function registerEventClick(){
+	
+$("#link-kembali-kalendar").bind("click", function() {
+	
+	$.mobile.changePage("#page-kalendar");
+	
+	grabDataScheduleServer();
+	
+	
+	
+});	
 	
 $("#link-logout").bind("click", function() {
 	
@@ -94,6 +256,9 @@ $(document).on( "slidestop",  ".slider-jam" ,function( event, ui ) {
 		
 	}
 	
+	// read data from server untuk this data
+	grabDataScheduleSpecificServer();
+	
 });
 
 $("#link-calendar").bind("click", function() {
@@ -104,17 +269,45 @@ $("#link-calendar").bind("click", function() {
 		date:new Date(),
 		onClickDate: function (date) {
 			console.log(JSON.stringify(date));
+			
+			var tglManusiawi = konversiAsHuman(date);
+			
+			$('#detail-tanggal-computer').text(date);
+			$('#detail-tanggal').text(tglManusiawi);
+			
+			// send data to server for this date
+			// with 5 hours of data OFF
+			// etc: 08:00, 10:00, 13:00, 16:00, 20:00
+			updateDummyDataScheduleServer(date, 0);
+			
+			
 			nextDetailPage();
 		}
 	});
 	
 	grabDataScheduleServer();	
 	
+	// create the button near the today button
+	createAutomaticFillButton();
+	
+	// hide the loading info
+	sembunyi('calendar-loading');
+	
 });	
+
+$(document).on( "click",  ".auto-fill-button" ,function() {
+        
+	// given from day 0 
+	autoFillData(0);
+		
+});
 
 $(document).on( "click",  ".prev-button" ,function() {
         
 	grabDataScheduleServer();	
+	
+	// create the button near the today button
+	createAutomaticFillButton();
 	
 });
 
@@ -122,12 +315,23 @@ $(document).on( "click",  ".next-button" ,function() {
         
 	grabDataScheduleServer();	
 	
+	// create the button near the today button
+	createAutomaticFillButton();
+	
 });
 	
 	
 $("#refresh-all").bind("click", function() {
 	
 	refreshDataTable();
+	
+});	
+
+$("#link-terapkan-lainnya").bind("click", function() {
+	
+	// obtain several data from hours of 
+	// that date
+	console.log('clicked');
 	
 });	
 
@@ -207,6 +411,42 @@ $("#confirm-data-terpilih").bind("click", function() {
 	
 }
 
+function convertDayEnglishToIndo(dayName){
+	
+	var english = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	
+	var indo = ["Ahad", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+	
+	var i=0;
+	var hariIndo = "";
+	
+	for(i=0; i<7; i++){
+		
+		if(dayName == english[i]){
+			hariIndo = indo[i];
+			break;
+		}
+		
+	}
+	
+	return hariIndo;
+	
+	
+}
+
+
+function konversiAsHuman(computerDate){
+	
+	var hasil =  moment(computerDate, 'YYYY-MM-DD HH:mm:ss').format('dddd, DD-MMM-YYYY');
+	
+	var hari = moment(computerDate, 'YYYY-MM-DD HH:mm:ss').format('dddd'); 
+	
+	hasil = hasil.replace(hari, convertDayEnglishToIndo(hari));
+	
+	return hasil;
+	
+}
+
 function refreshDataTable(){
 	
 	// clear the div
@@ -216,8 +456,35 @@ function refreshDataTable(){
 	tampilin('management-loading');
 	
 	// grab after 3 seconds
-	setTimeout(	grabDataServer, 3000);
+	setTimeout(	grabDataAllBookingServer, 3000);
 
+	
+}
+
+function extractDataToDetail(dataCome){
+	
+	var n = JSON.stringify(dataCome);
+    var data = JSON.parse(n);
+	
+	
+	var isiNa = data.multi_data;
+	// we got 5 hours data
+	for(let p = 0; p < isiNa.length; p++){
+		
+		var statNa = "";
+		var dateChosen = isiNa[p].date_chosen;
+		var currStatus = isiNa[p].status;
+		var desc = isiNa[p].description;
+		var id = isiNa[p].id;
+		var jam = isiNa[p].specific_hour;
+		
+		if(jam == '08:00'){
+			
+		}
+		
+		
+	}
+	
 	
 }
 
@@ -239,10 +506,10 @@ function extractDataToCalendar(dataCome){
 		
 		if(!isAlreadyInWholeData(dateChosen)){
 			statNa = addIntoWholeData(dateChosen, currStatus);
-			console.log('added into ' + dateChosen);
+			//console.log('added into ' + dateChosen);
 		}else{
 			statNa = updateWholeData(dateChosen, currStatus);
-			console.log('updated from ' + dateChosen);
+			//console.log('updated from ' + dateChosen);
 		}
 		
 		fillCalendar(dateChosen, statNa);
@@ -274,15 +541,23 @@ function addIntoWholeData(dataDate, dataStat){
 	n.date = dataDate;
 	n.availability = 0;
 	
-	n.availability += eval(dataStat);
-	
+	n.availability += parseInt(dataStat);
 	
 	dataWhole.push(n);
 	
-	console.log('add new ' + JSON.stringify(n));
+	//console.log('add new ' + JSON.stringify(n));
 	
 	// default
 	return "day-filled";
+	
+}
+
+function createAutomaticFillButton(){
+	
+	var elemen = "<button class='auto-fill-button'>Automatic</button>";
+	$('.special-buttons').append(elemen);
+	
+	
 	
 }
 
@@ -303,6 +578,7 @@ function clearCalendar(){
 		var param = '[data-date='+ dateGiven +']';
 		$('.week').find(param).find('span').removeClass('day-full');
 		$('.week').find(param).find('span').removeClass('day-filled');
+		$('.week').find(param).find('span').removeClass('day-0');
 		
 	}
 	
@@ -311,6 +587,18 @@ function clearCalendar(){
 function fillCalendar(dateGiven, stat){
 	
 	var param = '[data-date='+ dateGiven +']';
+	
+	if(stat == 'day-full'){
+		$('.week').find(param).find('span').removeClass('day-filled');
+		$('.week').find(param).find('span').removeClass('day-0');
+	}else if(stat == 'day-filled'){
+		$('.week').find(param).find('span').removeClass('day-full');
+		$('.week').find(param).find('span').removeClass('day-0');
+	}else if(stat == 'day-0'){
+		$('.week').find(param).find('span').removeClass('day-full');
+		$('.week').find(param).find('span').removeClass('day-filled');	
+	}
+	
 	$('.week').find(param).find('span').addClass(stat);
 	
 }
@@ -323,17 +611,22 @@ function updateWholeData(dateGiven, stat){
 	for(i=0; i<dataWhole.length; i++){
 	
 		if(dataWhole[i].date == dateGiven){
-			var v = dataWhole[i].availability;
 			
-			dataWhole[i].availability = eval(v) + eval(stat);
+			//console.log( i + ' aslinya nya ' + dataWhole[i].date + " dengan v : " + dataWhole[i].availability);
+			
+			var v = dataWhole[i].availability;
+			var n = parseInt(v) + parseInt(stat);
+			dataWhole[i].availability = n;
 			
 			if(dataWhole[i].availability >= 5){
 				status = "day-full";
 			}else if(dataWhole[i].availability>0){
 				status = "day-filled";
+			}else {
+				status = "day-0";
 			}
 			
-			console.log('ada nya ' + dataWhole[i].date + " dengan v : " + dataWhole[i].availability);
+			//console.log('kini jadi ' + dataWhole[i].date + " dengan v : " + dataWhole[i].availability);
 			
 			break;
 			
@@ -447,7 +740,7 @@ function deleteDataServer(){
 }
 
 
-function grabDataServer(){
+function grabDataAllBookingServer(){
 	
 	// request data from server
 	$.ajax({
@@ -522,7 +815,7 @@ function formLoginValidation(){
 					if(checkValidity(result)){
 						$.mobile.changePage("#page-management-booking");
 						// request data from Server
-						grabDataServer();
+						grabDataAllBookingServer();
 					}else{
 						$.mobile.changePage("#page-login-failed");
 					}
