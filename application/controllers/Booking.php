@@ -6,6 +6,7 @@ class Booking extends CI_Controller {
 	function __construct() {
 		parent::__construct();
 		$this->load->model('BookingRequestModel');
+		$this->load->model('ScheduleModel');
 	}
 	
 	public function index()
@@ -30,6 +31,7 @@ class Booking extends CI_Controller {
 		$usernameIn 	= $this->input->post('username');
 		$code 			= $this->input->post('code');
 		$treatment		= $this->input->post('treatment');
+		$gender			= $this->input->post('gender');
 		
 		// make it as string
 		$treatment = json_encode($treatment);
@@ -51,7 +53,7 @@ class Booking extends CI_Controller {
 		// d. changed
 		// e. approved
 		
-		$endRespond 	=	$this->BookingRequestModel->add($code, $treatment, $sdate, $usernameIn, $status);
+		$endRespond 	=	$this->BookingRequestModel->add($code, $treatment, $sdate, $usernameIn, $status, $gender);
 		
 		echo json_encode($endRespond);
 		
@@ -97,9 +99,31 @@ class Booking extends CI_Controller {
 	public function edit(){
 		
 		$code 			= $this->input->post('code');
+		$id 			= $this->input->post('id');
 		$status			= $this->input->post('status');
 		
-		$endRespond 	=	$this->BookingRequestModel->update($code, $status);
+		$gender			= $this->input->post('gender');
+		
+		$date			= $this->input->post('date');
+		$hour			= $this->input->post('hour');
+		
+		$code 			= $this->input->post('code');
+		
+		// previously we choose to update by code
+		// but now we choose only by id
+		$endRespond 	=	$this->BookingRequestModel->update($id, $status);
+		
+		if($endRespond['status']='valid'){
+			
+			$statAvailable = 0;
+			
+			if($status == 'approved'){
+				$statAvailable = 1;
+			}
+			
+			$endRespond = $this->ScheduleModel->updateIfAny($code, $date, $hour, $statAvailable, $gender);
+		}
+		
 		echo json_encode($endRespond);
 		
 	}

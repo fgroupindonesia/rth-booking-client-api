@@ -19,6 +19,86 @@
 	
 }
 
+#management-control-pasien{
+	text-align: right;
+    margin-right: 50px;
+    margin-bottom: 20px
+}
+
+#link-reset, #link-aktifasi, #refresh-pasien, #link-non-aktifasi {
+	margin-left: 10px;
+	margin-right: 10px;
+	display: inline-block;
+}
+
+#link-reset{
+		width: 155px;
+}
+
+#link-aktifasi, #refresh-pasien, #link-non-aktifasi{
+	width: 100px;
+}
+
+#link-aktifasi{
+  background-image: url("/images/success_28.png");
+  background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
+#link-non-aktifasi{
+  background-image: url("/images/error_28.png");
+  background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
+#refresh-pasien{
+  background-image: url("/images/refresh.png");
+  background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
+#link-reset{
+  background-image: url("/images/email_28.png");
+  background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
+.pasien-gender{
+	display:inline-block;
+	width: 75px;
+	height: 18px;
+}
+
+.pasien-no-email{
+  background-image: url("/images/email_error_28.png") ;
+  background-repeat: no-repeat;
+  background-position: 20% 50%;
+}
+
+.pasien-nonactive{
+  background-image: url("/images/closed_lock_28.png");
+  background-repeat: no-repeat;
+  background-position: 20% 50%;
+}
+
+.pasien-active{
+  background-image: url("/images/open_lock_28.png");
+  background-repeat: no-repeat;
+  background-position: 20% 50%;
+}
+
+.treatment-male, .pasien-male{
+  background-image: url("/images/male_28.png");
+  background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
+.treatment-female, .pasien-female{
+  background-image: url("/images/female_28.png");
+  background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
 #calendar-error{
 	color: red;
 	font-weight: bold;
@@ -28,11 +108,13 @@
 .pesan-error{
 	color: red;
 	font-weight: bold;
+		display: none;
 }
 
 .pesan-loading{
 	color: black;
 	font-weight: bold;
+		display: none;
 }
 
 .day-full{

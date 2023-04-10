@@ -54,3 +54,7 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 $route['user/test'] = 'User/test';
 $route['user/activate'] = 'User/aktifasi';
+$route['user/activate/now'] = 'User/directaktifasi';
+$route['user/disactivate/now'] = 'User/directnonaktifasi';
+$route['user/resetpass/via/email'] = 'User/resetPass';
+$route['user/resetpass/via/chat'] = 'User/resetPassDirect';

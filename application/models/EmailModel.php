@@ -114,6 +114,25 @@ class EmailModel extends CI_Model {
 		return true;
 	}
 	
+	public function email_activated_success($email, $dataUser){
+		
+		$title = "Selamat Akun Sudah Aktif!";
+		
+		$dataArray = array(
+			'fullname' => $dataUser['full_name'],
+			'username' => $dataUser['username'],
+			'nohp' => $dataUser['contact'],
+			'pass' => $dataUser['pass']
+		);
+		
+		$emailKonten = $this->load->view('template/_email_activated_success', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
 	private function konversiHariEnglishToIndonesia($hari){
 		
 		$harina = $hari;

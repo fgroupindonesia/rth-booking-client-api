@@ -1,4 +1,4 @@
 git add .
-git commit -m "Fixing Admin UI for managing detail for each schedule."
+git commit -m "Admin Control for resetting & activating user is accomplished!"
 git push origin main --force
 git gc --prune

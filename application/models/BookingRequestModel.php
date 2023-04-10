@@ -86,7 +86,7 @@ class BookingRequestModel extends CI_Model {
 	}
 	
 	public function add($code, $treatment, $schedule_date,
-			 $username, $status){
+			 $username, $status, $gender){
 		
 		$endResult = $this->generateRespond('invalid');
 		
@@ -94,6 +94,7 @@ class BookingRequestModel extends CI_Model {
 		
 		$data = array(
 			'code' 				=> $code,
+			'gender'			=> $gender,
 			'treatment' 		=> $treatment,
 			'schedule_date' 	=> $schedule_date,
 			'username' 			=> $username,
@@ -130,7 +131,7 @@ class BookingRequestModel extends CI_Model {
 		return $endResult;
 	}
 	
-	public function update($code, $status){
+	public function update($id, $status){
 		
 		$stat = 'invalid';
 		
@@ -138,7 +139,7 @@ class BookingRequestModel extends CI_Model {
 			'status' 			=> $status
 		);
 		
-		$this->db->where('code', $code);
+		$this->db->where('id', $id);
 		$this->db->update('rth_booking_request', $data);
 		
 		if($this->db->affected_rows() > 0){
@@ -209,6 +210,7 @@ class BookingRequestModel extends CI_Model {
 			$data = array(
 				'id' 			=> $row->id,
 				'code' 			=> $row->code,
+				'gender'		=> $row->gender,
 				'treatment' 	=> $dataTreatment,
 				'schedule_date' => $row->schedule_date,
 				'username' 		=> $row->username,
@@ -296,6 +298,7 @@ class BookingRequestModel extends CI_Model {
 				'treatment' 	=> $dataTreatment,
 				'schedule_date' => $row->schedule_date,
 				'username' 		=> $row->username,
+				'gender'		=> $row->gender,
 				'status' 		=> $row->status,
 				'created_date' 	=> $row->created_date,
 				'modified_date' 	=> $row->modified_date

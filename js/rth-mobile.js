@@ -94,16 +94,18 @@ function clickEventPilihAnggotaSelesai(){
 			
 			var fname = $(this).attr('fullname');
 			var usname = $(this).attr('username');
+			var gen = $(this).attr('gender');
 			
 			var orang = {};
 			orang.full_name = fname;
 			orang.username = usname;
+			orang.gender = gen;
 			
 			if(!namaAnggotaTerapiList.includes(orang)){
 				namaAnggotaTerapiList.push(orang);
 			}
 			
-			console.log('orang yg mo ikut '+ JSON.stringify(namaAnggotaTerapiList));
+			//console.log('orang yg mo ikut '+ JSON.stringify(namaAnggotaTerapiList));
 			
 				$.mobile.changePage("#page-pilih-terapi");	
 			
@@ -210,6 +212,7 @@ function clickEventPilihAnggotaAtauLangsungTerapi(){
 				var orang = {};
 				orang.full_name = fullname_sembunyi;
 				orang.username = username_sembunyi;
+				orang.gender = gender_sembunyi;
 			
 				namaAnggotaTerapiList.push(orang);
 		}
@@ -412,6 +415,8 @@ function refreshDataPilihanBooking(){
 		month_year : month_year_sembunyi,
 		gender_therapist : gender_sembunyi		
 	};
+	
+	console.log(' kita coba refresh by date ' + JSON.stringify(kiriman));
 	
 	//alert('akan kirim '  + JSON.stringify(kiriman));
 	
@@ -905,6 +910,7 @@ function collectBookingOrder(jamMasuk){
 	//var fullNa = fullname_sembunyi;
 	var usernameNa 	= namaAnggotaTerapiList[i].username;
 	var fullNa 		= namaAnggotaTerapiList[i].full_name;
+	var genderNa	= namaAnggotaTerapiList[i].gender;
 	
 	var schedDate = $('#pilih-tanggal').val();
 	
@@ -941,7 +947,8 @@ function collectBookingOrder(jamMasuk){
 		fullname : fullNa,
 		treatment: objTreatment,
 		schedule_date : schedDate,
-		human_date : jadwal_sembunyi
+		human_date : jadwal_sembunyi,
+		gender: genderNa
 	};
 	
 	console.log('kirimkan ' + postData);
@@ -1169,6 +1176,7 @@ function extractDataAnggotaCheckbox(dataCome){
 		var chk = "<input type='checkbox' " +
 		"id='checkbox-anggota-" + p +"' " +
 		"name='checkbox-anggota-" + p +"' " +
+		"gender='"+ isiNa[p].gender +"' " +
 		"fullname='" + isiNa[p].full_name+"' " +
 		"username='" + usernameRapet + "' "+
 		 "/>";

@@ -150,6 +150,48 @@ class UserModel extends CI_Model {
 		
 	}
 	
+	public function lockUserByIdWithToken($id, $token){
+		
+		$stat = 'invalid';
+		
+		$endResult = $this->generateRespond($stat);
+		
+		$data = array(
+			'status'	=> 'disabled',
+			'token'		=> $token
+		);
+		
+		$this->db->where('id', $id);
+		$this->db->update('rth_users', $data);
+		
+		if($this->db->affected_rows() > 0){
+				$endResult['status'] = 'valid';
+				$endResult['multi_data'] = $token;
+		}
+		
+		return $endResult;
+		
+	}
+	
+	public function lockUserById($id){
+		
+		$stat = 'invalid';
+		
+		$data = array(
+			'status'	=> 'disabled'
+		);
+		
+		$this->db->where('id', $id);
+		$this->db->update('rth_users', $data);
+		
+		if($this->db->affected_rows() > 0){
+				$stat = 'valid';
+		}
+		
+		return $this->generateRespond($stat);
+		
+	}
+	
 	public function activateUser($email, $token){
 		
 		$stat = 'invalid';
@@ -173,6 +215,54 @@ class UserModel extends CI_Model {
 		return $this->generateRespond($stat);
 		
 	}
+	
+	public function activateUserNoEmail($token){
+		
+		$stat = 'invalid';
+		
+		$data = array(
+			'token' 	=> $token
+		);
+		
+		$updateData = array (
+			'status' => 'active'
+		);
+		
+		$this->db->where($data);
+		$this->db->update('rth_users', $updateData);
+		
+		if($this->db->affected_rows() > 0){
+				$stat = 'valid';
+		}
+		
+		return $this->generateRespond($stat);
+		
+	}
+	
+	public function activateUserDirectly($email){
+		
+		$stat = 'invalid';
+		
+		$data = array(
+			'email' 	=> $email
+		);
+		
+		$updateData = array (
+			'status' => 'active'
+		);
+		
+		$this->db->where($data);
+		$this->db->update('rth_users', $updateData);
+		
+		if($this->db->affected_rows() > 0){
+				$stat = 'valid';
+		}
+		
+		return $this->generateRespond($stat);
+		
+	}
+	
+	
 	
 	
 	public function checkDuplicates($usernameIn){
@@ -354,11 +444,13 @@ class UserModel extends CI_Model {
 				'pass' 			=> $row->pass,
 				'email' 		=> $row->email,
 				'home_address' 	=> $row->home_address,
+				'status'		=> $row->status,
 				'propic' 		=> $row->propic,
 				'contact' 		=> $row->contact,
 				'membership' 	=> $row->membership,
 				'full_name' 	=> $row->full_name,
-				'gender' 		=> $row->gender
+				'gender' 		=> $row->gender,
+				'alive'			=> $row->alive
 			);
 			
 			// grab all data except for admin

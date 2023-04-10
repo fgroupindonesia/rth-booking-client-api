@@ -19,6 +19,26 @@ class FamilyUserModel extends CI_Model {
 		return $stat;
 	}
 	
+	private function getGenderByFullname($byFullname){
+		
+		// default is female 0
+		$hasil = 0;
+		
+		$multiParam = array(
+			'full_name' => $byFullname
+		);
+		
+		$this->db->where($multiParam);		
+		$query = $this->db->get('rth_users');
+		
+		foreach ($query->result() as $row)
+		{
+			$hasil = $row->gender;
+		}
+		
+		return $hasil;
+	}
+	
 	public function getAll($byUsername){
 		
 		$endResult = $this->generateRespond('invalid');
@@ -34,9 +54,12 @@ class FamilyUserModel extends CI_Model {
 		{
 			$endResult['status'] = 'valid';
 			
+			$genderNa = $this->getGenderByFullname($row->full_name);
+			
 			$data = array(
 				'id' 				=> $row->id,
 				'full_name' 		=> $row->full_name,
+				'gender'			=> $genderNa,
 				'username_incharge' => $row->username_incharge,
 				'rel_connection' 	=> $row->rel_connection,
 				'created_date' 		=> $row->created_date

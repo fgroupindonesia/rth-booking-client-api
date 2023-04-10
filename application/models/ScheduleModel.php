@@ -101,6 +101,69 @@ class ScheduleModel extends CI_Model {
 		return $this->generateRespond($stat);
 		
 	}
+	
+	private function getFullname($codeBooking){
+		
+		$hasil = "";
+		
+		$this->db->where('code', $codeBooking);
+		$query = $this->db->get('rth_booking_request');
+		
+		$username = "";
+		foreach ($query->result() as $row)
+		{
+		
+			$username = $row->username;
+		
+		}
+		
+		if(!empty($username)){
+		
+			$this->db->where('username', $username);
+			$query = $this->db->get('rth_users');
+			
+			$username = "";
+			foreach ($query->result() as $row)
+			{
+				$hasil = $row->full_name;
+			}
+		
+		}
+		
+		return $hasil;
+		
+	}
+	
+	public function updateIfAny($codeBooking, $date_chosen, $specific_hour, $status, $gender_therapist){
+		
+		$stat = 'invalid';
+		
+		$namaOrang = $this->getFullname($codeBooking);
+		
+		$data = array(
+				'status' 			=> $status,
+				'description' 		=> $namaOrang
+		);
+		
+		$multiParam = array(
+			'date_chosen' => $date_chosen,
+			'specific_hour' => $specific_hour,
+			'gender_therapist' 	=> $gender_therapist
+		);
+	
+		
+		$this->db->where($multiParam);
+		$this->db->update('rth_schedules', $data);
+		
+		if($this->db->affected_rows() > 0){
+				$stat = 'valid';
+		}else{
+			 $this->add($date_chosen, $specific_hour, $status, $namaOrang, $gender_therapist);
+		}
+		
+		return $this->generateRespond($stat);
+		
+	}
 		
 	public function monthIntoNumber($mYear){
 		

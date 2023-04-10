@@ -1,6 +1,9 @@
 var kiriman = {};
 var dataWhole = [];
 
+// this is for whatsapp purposes (admin notif)
+var url_sembunyi = "";
+
 var data5Jam = ["08:00", "10:00", "13:00", "16:00", "20:00"];
 var batasJam = data5Jam.length;
 
@@ -12,7 +15,37 @@ $(document).ready(function(){
 	
 	registerEventClick();
 	
+	registerEventType();
+	
 });
+
+function registerEventType(){
+	
+	$(".detail-description").on('input',function(e){
+		
+		// update the selected data
+		var v = $(this).parent().parent().find('select').val();
+		
+		var idNa = $(this).attr('data-id');
+		var gender = $('#flip-gender').val();
+		
+		kiriman = {};
+		kiriman.id = idNa;
+		kiriman.date_chosen = $('#detail-tanggal-computer').text();
+		kiriman.specific_hour = $(this).attr('data-jam');
+		kiriman.status = v;
+		kiriman.description = $(this).val();
+		kiriman.gender_therapist = gender;
+		
+		console.log('coba send type ' + JSON.stringify(kiriman));
+		
+		updateDataScheduleServer(false);
+		
+		
+		
+	});
+	
+}
 
 function showErrorCalendar(psan){
 	tampilin('calendar-error');
@@ -41,13 +74,20 @@ function updateDummyDataScheduleServer(tglComputer, indexNow){
 		myResolve(indexJam);
 	  } else {
 		indexJam=0;
+		
+		// last request once completely filling the dummy data 
+		// now read data from server untuk this data
+		grabDataScheduleSpecificServer();
+		
 		myReject("done");
 	  }
 	});
 
 	myPromise.then(
 	  function(value) { updateDummyDataScheduleServer(tglComputer, value);},
-	  function(error) { sembunyi('calendar-loading'); sembunyi('calendar-error'); }
+	  function(error) { sembunyi('detail-loading'); 
+						sembunyi('calendar-loading'); 
+						sembunyi('calendar-error'); }
 	);
 	
 }
@@ -96,13 +136,13 @@ function addScheduleData(jamMasuk, tglComputer){
 function grabDataScheduleSpecificServer(){
 	
 	var genderna = $('#flip-gender').val();
-	var tgl = $('#detail-tanggal-computer').val();
+	var tgl = $('#detail-tanggal-computer').text();
 	
 	kiriman = {};
 	kiriman.date_chosen = tgl;
 	kiriman.gender_therapist = genderna;
 	
-	//console.log('kirimin ' + JSON.stringify(kiriman));
+	console.log('nyoba grab ' + JSON.stringify(kiriman));
 	
 	$.ajax({
                 type: 'POST',
@@ -117,15 +157,16 @@ function grabDataScheduleSpecificServer(){
 						extractDataToDetail(result);
 						
 						sembunyi('detail-error');
-						tampilin('detail-loading');
+						
 					}else{
 						
 						tampilin('detail-error');
-						sembunyi('detail-loading');
 						
 						console.log(JSON.stringify(result));
 						
 					}
+					
+					sembunyi('detail-loading');
 					
                 },
                 error : function(error) {
@@ -181,6 +222,31 @@ function grabDataScheduleServer(){
 	
 }
 
+function updateDataScheduleServer(backToCalendar){
+	
+	$.ajax({
+                type: 'POST',
+                url: '/schedule/update',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+							if(backToCalendar){
+								$.mobile.changePage("#page-kalendar");
+								grabDataScheduleServer();
+							}
+					}
+					
+                },
+                error : function(error) {
+					showErrorCalendar("error!");
+                }
+    });
+	
+}
+
 function autoFillData(angkaMasuk){
 	
 	// from 1 date of this month
@@ -215,6 +281,33 @@ function autoFillData(angkaMasuk){
 	
 }
 
+function resetDetailForm(){
+	switchClass(8, false);
+	switchClass(10, false);
+	switchClass(13, false);
+	switchClass(16, false);
+	switchClass(20, false);
+	
+	sembunyi('detail-description-jam8');
+	sembunyi('detail-description-jam10');
+	sembunyi('detail-description-jam13');
+	sembunyi('detail-description-jam16');
+	sembunyi('detail-description-jam20');
+	
+	$('.detail-description').val('');
+}
+
+function switchClass(jam, tongol3Kolom){
+	
+	if(tongol3Kolom == false){
+		$('#data-jam'+jam).addClass('ui-grid-a');
+		$('#data-jam'+jam).removeClass('ui-grid-b');
+	}else{
+		$('#data-jam'+jam).addClass('ui-grid-b');
+		$('#data-jam'+jam).removeClass('ui-grid-a');
+	}
+}
+
 function registerEventClick(){
 	
 $("#link-kembali-kalendar").bind("click", function() {
@@ -223,10 +316,60 @@ $("#link-kembali-kalendar").bind("click", function() {
 	
 	grabDataScheduleServer();
 	
-	
-	
 });	
+
+$("#link-management-pasien").bind("click", function() {
 	
+	refreshDataPasienTable();
+		
+});	
+
+$("#link-aktifasi").bind("click", function() {
+
+	$('.pasien-id:checked').each(function () {
+       
+	  var emailNa =  $(this).parent().parent().find('.pasien-email').text();
+	 
+		kiriman = {
+			email : emailNa
+		};
+	 
+		console.log('mencoba aktifasi ' + JSON.stringify(kiriman));
+	 
+		if(emailNa !== ""){
+			updateDataActivationServer();
+		}else{
+			alert('pasien tidak memiliki email!');
+		}
+	 
+  });
+	
+	
+		
+});
+
+$("#link-non-aktifasi").bind("click", function() {
+
+	$('.pasien-id:checked').each(function () {
+       
+	  var idNa =  $(this).val();
+	 
+		kiriman = {
+			id : idNa
+		};
+	 
+		console.log('mencoba penguncian ' + JSON.stringify(kiriman));
+	 
+		if(idNa !== ""){
+			updateDataDisactivationServer();
+		}
+	 
+  });
+	
+	
+		
+});		
+
 $("#link-logout").bind("click", function() {
 	
 	$.mobile.changePage("#page0", {reloadPage : true});
@@ -240,24 +383,44 @@ $(document).on( "slidestop",  "#flip-gender" ,function( event, ui ) {
 	
 });
 
-
 $(document).on( "slidestop",  ".slider-jam" ,function( event, ui ) {
         
 	var v =	$(this).val();
+	var desc = '';
 	
-	if(v == 'on'){
+	if(v == '1'){
 		$(this).parent().parent().addClass('ui-grid-b');
 		$(this).parent().parent().removeClass('ui-grid-a');
 		$(this).parent().parent().find('textarea').show();
-	}else if(v == 'off'){
+		
+		desc = $(this).parent().parent().find('textarea').val();
+	}else if(v == '0'){
 		$(this).parent().parent().addClass('ui-grid-a');
 		$(this).parent().parent().removeClass('ui-grid-b');
 		$(this).parent().parent().find('textarea').hide();
 		
+		// clear the text area
+		$(this).parent().parent().find('textarea').val('');
 	}
 	
-	// read data from server untuk this data
-	grabDataScheduleSpecificServer();
+	// update the selected data
+	
+	var idNa = $(this).attr('data-id');
+	var gender = $('#flip-gender').val();
+	
+	kiriman = {};
+	kiriman.id = idNa;
+	kiriman.date_chosen = $('#detail-tanggal-computer').text();
+	kiriman.specific_hour = $(this).attr('data-jam');
+	kiriman.status = v;
+	kiriman.description = desc;
+	kiriman.gender_therapist = gender;
+	
+	console.log('mau disend ' + JSON.stringify(kiriman));
+	
+	updateDataScheduleServer(false);
+	
+	
 	
 });
 
@@ -275,11 +438,13 @@ $("#link-calendar").bind("click", function() {
 			$('#detail-tanggal-computer').text(date);
 			$('#detail-tanggal').text(tglManusiawi);
 			
+			// clear detail form
+			resetDetailForm();
+			
 			// send data to server for this date
 			// with 5 hours of data OFF
 			// etc: 08:00, 10:00, 13:00, 16:00, 20:00
 			updateDummyDataScheduleServer(date, 0);
-			
 			
 			nextDetailPage();
 		}
@@ -319,11 +484,16 @@ $(document).on( "click",  ".next-button" ,function() {
 	createAutomaticFillButton();
 	
 });
-	
-	
+		
 $("#refresh-all").bind("click", function() {
 	
 	refreshDataTable();
+	
+});	
+
+$("#refresh-pasien").bind("click", function() {
+	
+	refreshDataPasienTable();
 	
 });	
 
@@ -334,7 +504,6 @@ $("#link-terapkan-lainnya").bind("click", function() {
 	console.log('clicked');
 	
 });	
-
 
 $("#link-delete").bind("click", function() {
  
@@ -369,12 +538,24 @@ $("#link-update").bind("click", function() {
 	  var code =  $(this).parent().parent().find('.treatment-code').text();
 	  var usname = $(this).parent().parent().find('.treatment-username').text();
 	  var sched = $(this).parent().parent().find('.treatment-schedule-date').text();
+	  var idNa = $(this).val();
+	  
+	  var dateNa = $(this).parent().parent().find('.treatment-schedule-date').attr('date');
+	  var hourNa = $(this).parent().parent().find('.treatment-schedule-date').attr('hour');
+	  
+	  var genderNa = $(this).parent().parent().find('.treatment-gender').text();
 	  
 	  if(code !== undefined){
 	  
+		$('#upstat-id-treatment').text(idNa);
 		$('#upstat-code-treatment').text(code);
 		$('#upstat-username-treatment').text(usname);	
-		$('#upstat-schedule-treatment').text(sched);			
+		$('#upstat-schedule-treatment').text(sched);	
+		
+		// computer date 
+		$('#upstat-computer-date-treatment').text(dateNa);
+		$('#upstat-computer-hour-treatment').text(hourNa);
+		$('#upstat-gender-treatment').text(genderNa);
 		//alert('piilhan ' + $(this).val());
 		
 		$.mobile.changePage("#page-update-stat");
@@ -387,28 +568,65 @@ $("#link-update").bind("click", function() {
 	
 });
 
-
 $("#confirm-data-terpilih").bind("click", function() {
 
 	var statPilihan = $('#status-treatment').val();
 	var codePilihan = $('#upstat-code-treatment').text();
+	var idNa = $('#upstat-id-treatment').text();
+	var gen = $('#upstat-gender-treatment').text();
+	var hourNa = $('#upstat-computer-hour-treatment').text();
+	var dateNa = $('#upstat-computer-date-treatment').text();
 	
 	// given the data 
 	kiriman = {
 		status : statPilihan,
-		code : codePilihan
+		code : codePilihan,
+		gender : gen,
+		date: dateNa,
+		hour: hourNa,
+		id : idNa
 	};
+	
+	console.log('mo konfirmasi ' + JSON.stringify(kiriman));
 	
 	// call server for updating 
 	updateDataServer();
 	
-	refreshDataTable();
+	$('#status-treatment').selectmenu();
+	$('#status-treatment').selectmenu('refresh', true);
 	
 	
 });
 
+$("#link-reset").bind("click", function() {
+ 
+	// get selected data
+ 	$('.pasien-id:checked').each(function () {
+       
+	    var emailNa =  $(this).parent().parent().find('.pasien-email').text();
+		var idNa =  $(this).val();
+	 
+		kiriman = {
+			reset_email : emailNa,
+			id : idNa
+		};
+	 
+		console.log('mencoba reset password via email ' + JSON.stringify(kiriman));
+	 
+		if(emailNa !== ""){
+			updateDataResetPassEmailServer();
+		}else{
+			alert('pasien tidak memiliki email! Resetting default...');
+			updateDataResetPassChatServer();
+		}
+	 
+		
+  });
+  
+  
 	
-	
+});
+		
 }
 
 function convertDayEnglishToIndo(dayName){
@@ -434,7 +652,6 @@ function convertDayEnglishToIndo(dayName){
 	
 }
 
-
 function konversiAsHuman(computerDate){
 	
 	var hasil =  moment(computerDate, 'YYYY-MM-DD HH:mm:ss').format('dddd, DD-MMM-YYYY');
@@ -445,6 +662,14 @@ function konversiAsHuman(computerDate){
 	
 	return hasil;
 	
+}
+
+function konversiAsHumanWithHour(computerDate){
+	
+	var hasil = konversiAsHuman(computerDate);
+	// get the hour
+	var jam = computerDate.split(" ")[1].substring(0,5);
+	return hasil + " " + jam;
 }
 
 function refreshDataTable(){
@@ -461,26 +686,101 @@ function refreshDataTable(){
 	
 }
 
+function refreshDataPasienTable(){
+	
+	// clear the div
+	$('#pasien-table-head').nextAll('div').remove();
+	
+	// show the loading
+	tampilin('management-loading-pasien');
+	
+	// grab after 3 seconds
+	setTimeout(	grabDataAllPasienServer, 3000);
+
+	
+}
+
+function tampilinTextarea(val, jam, desc){
+	if(val == 1){
+			    $('#detail-description-jam'+jam).val(desc);
+				tampilin('detail-description-jam'+jam);
+				switchClass(jam, true);
+	}else{
+				sembunyi('detail-description-jam'+jam);
+				switchClass(jam, false);
+	}
+}
+
 function extractDataToDetail(dataCome){
 	
 	var n = JSON.stringify(dataCome);
     var data = JSON.parse(n);
 	
+	console.log('dapet dr detail ' + JSON.stringify(dataCome));
 	
 	var isiNa = data.multi_data;
 	// we got 5 hours data
 	for(let p = 0; p < isiNa.length; p++){
 		
-		var statNa = "";
-		var dateChosen = isiNa[p].date_chosen;
+		var dateChosen = isiNa[p].date_choosen;
 		var currStatus = isiNa[p].status;
 		var desc = isiNa[p].description;
 		var id = isiNa[p].id;
 		var jam = isiNa[p].specific_hour;
 		
+		var el = {};
+		
 		if(jam == '08:00'){
 			
+			$('#detail-description-jam8').attr('data-id', id);
+			$('#flip-jam8').attr('data-id', id);
+			
+			el = $('#flip-jam8');
+			
+			tampilinTextarea(currStatus, '8', desc);
+			
+			
+		}else if(jam == '10:00'){
+			
+			$('#detail-description-jam10').attr('data-id', id);
+			$('#flip-jam10').attr('data-id', id);
+			
+			el = $('#flip-jam10');
+			
+			tampilinTextarea(currStatus, '10', desc);
+			
+		}else if(jam == '13:00'){
+			
+			$('#detail-description-jam13').attr('data-id', id);
+			$('#flip-jam13').attr('data-id', id);
+			
+			el = $('#flip-jam13');
+			
+			tampilinTextarea(currStatus, '13', desc);
+			
+		}else if(jam == '16:00'){
+		
+			$('#detail-description-jam16').attr('data-id', id);
+			$('#flip-jam16').attr('data-id', id);
+			
+			el = $('#flip-jam16');
+			
+			tampilinTextarea(currStatus, '16', desc);
+			
+		}else if(jam == '20:00'){
+			
+			$('#detail-description-jam20').attr('data-id', id);
+			$('#flip-jam20').attr('data-id', id);
+			
+			el = $('#flip-jam20');
+		
+			tampilinTextarea(currStatus, '20', desc);
 		}
+		
+		el.val(currStatus).slider('refresh');
+		//el.selectmenu();
+		//el.selectmenu('refresh', true);
+		
 		
 		
 	}
@@ -556,7 +856,6 @@ function createAutomaticFillButton(){
 	
 	var elemen = "<button class='auto-fill-button'>Automatic</button>";
 	$('.special-buttons').append(elemen);
-	
 	
 	
 }
@@ -639,6 +938,70 @@ function updateWholeData(dateGiven, stat){
 	return status;
 }
 
+function extractDataPasienToTable(dataCome){
+	
+	var n = JSON.stringify(dataCome);
+    var data = JSON.parse(n); // Try to parse the response as JSON
+	
+	var isiNa = data.multi_data;
+	
+	for(let p = 0; p < isiNa.length; p++){
+		//console.log(isiNa[p]);
+		/*
+		CREATING THIS ONE
+		<div class="ui-grid-d" id="pasien-table-head" >
+			<div class="ui-block-a"><b>ID</b></div>
+			<div class="ui-block-b"><b>FULLNAME</b></div>
+			<div class="ui-block-c"><b>CONTACT</b></div>
+			<div class="ui-block-d"><b>STATUS</b></div>
+			<div class="ui-block-e"><b>GENDER</b></div>
+		</div>
+		
+		*/
+		
+		var hiddenEmail = "<span hidden class='pasien-email'>" +isiNa[p].email+ "</span>";
+		
+		var encloser1a = "<div class='ui-grid-d data-table-cell'>";
+		var encloser1b = "</div>";
+		
+		var chk = "<input class='pasien-id' type='checkbox' value='" +isiNa[p].id + "'/>";
+		
+		
+		var id = "<div class='ui-block-a'>" + chk + "</div>";
+		var fullname = "<div class='ui-block-b pasien-fullname'>" + isiNa[p].full_name + "</div>";
+		var contact = "<div class='ui-block-c pasien-contact'>" + isiNa[p].contact + "</div>";
+		
+		var classGender = "pasien-female";
+		
+		if(isiNa[p].gender == 1){
+			classGender = "pasien-male";
+		}
+		
+		
+		var classActiveWarning = " pasien-active";
+		
+		if(isiNa[p].status == "disabled"){
+			classActiveWarning = " pasien-nonactive";
+		}else if(isiNa[p].status == "active"){
+			classActiveWarning = " pasien-active";
+		}else if(isiNa[p].email == ""){
+			classActiveWarning = " pasien-no-email";
+		}
+		
+		var genderIcon = "<span data-gender='"+ isiNa[p].gender +"' class='pasien-gender "+ classGender+"'></span>";
+		
+		var stat = "<div class='ui-block-d"+classActiveWarning+"'>" + isiNa[p].status + "</div>";
+		
+		var gender = "<div class='ui-block-e'>" + genderIcon + "</div>";
+		
+		var combined = encloser1a + hiddenEmail + id + fullname + contact + stat + gender + encloser1b;
+		
+		$(combined).insertAfter("#pasien-table-head");
+		
+	}
+	
+}
+
 function extractDataToTable(dataCome){
 	
 	var n = JSON.stringify(dataCome);
@@ -659,15 +1022,30 @@ function extractDataToTable(dataCome){
 		</div>
 		
 		*/
+		var classGender = "treatment-female";
+		
+		if(isiNa[p].gender == 1){
+			classGender  = "treatment-male";
+		}
+		
 		var encloser1a = "<div class='ui-grid-d data-table-cell'>";
 		var encloser1b = "</div>";
 		
 		var chk = "<input class='treatment-id' type='checkbox' value='" +isiNa[p].id + "'/>";
 		
-		var id = "<div class='ui-block-a'>" + chk + "</div>";
+		var genderHidden = "<span hidden class='treatment-gender'>" + isiNa[p].gender + "</span>";
+		
+		
+		
+		var id = genderHidden + "<div class='ui-block-a'>" + chk + "</div>";
 		var code = "<div class='ui-block-b treatment-code'>" + isiNa[p].code + "</div>";
-		var usname = "<div class='ui-block-c treatment-username'>" + isiNa[p].username + "</div>";
-		var sdate = "<div class='ui-block-d treatment-schedule-date'>" + isiNa[p].schedule_date + "</div>";
+		var usname = "<div class='ui-block-c treatment-username "+ classGender +"'>" + isiNa[p].username + "</div>";
+		
+		var tgl = konversiAsHumanWithHour(isiNa[p].schedule_date);
+		var dateNa = isiNa[p].schedule_date.split(" ")[0];
+		var hourNa = isiNa[p].schedule_date.split(" ")[1].substring(0,5);
+
+		var sdate = "<div hour='"+hourNa+"' date='"+dateNa+"' class='ui-block-d treatment-schedule-date'>" + tgl + "</div>";
 		var stat = "<div class='ui-block-e'>" + isiNa[p].status + "</div>";
 		
 		
@@ -679,7 +1057,129 @@ function extractDataToTable(dataCome){
 	
 }
 
-var kiriman = "";
+function updateDataActivationServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/activate/now',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						refreshDataPasienTable();
+					}else{
+					
+					// if error
+					console.log('error for updating data pasien!\n' + result);	
+					
+					}
+					
+                },
+                error : function(error) {
+					console.log(JSON.stringify(error));
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function updateDataDisactivationServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/disactivate/now',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						refreshDataPasienTable();
+						
+					}else{
+					
+					// if error
+					console.log('error for updating data pasien!\n' + result);	
+					
+					}
+					
+                },
+                error : function(error) {
+					console.log(JSON.stringify(error));
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function updateDataResetPassEmailServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/resetpass/via/email',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						refreshDataPasienTable();
+						
+					}else{
+					
+					// if error
+					console.log('error for updateDataResetPassEmailServer!\n' + result);	
+					
+					}
+					
+                },
+                error : function(error) {
+					console.log(JSON.stringify(error));
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function updateDataResetPassChatServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/resetpass/via/chat',
+                dataType: 'json',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						
+						extractDataResetToWhatsapp(result);
+						
+					}else{
+					
+					// if error
+					console.log('error for updateDataResetPassEmailServer!\n' + result);	
+					
+					}
+					
+                },
+                error : function(error) {
+					console.log(JSON.stringify(error));
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
 
 function updateDataServer(){
 	
@@ -694,16 +1194,16 @@ function updateDataServer(){
 					// check validity
 					if(checkValidity(result)){
 						$.mobile.changePage("#page-management-booking");
+						refreshDataTable();
 					}else{
 						// if error
 					console.log('error for updating booking status!\n' + result);	
 					
 					}
 					
-					
-					
                 },
                 error : function(error) {
+					console.log(JSON.stringify(error));
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -725,10 +1225,12 @@ function deleteDataServer(){
 						$.mobile.changePage("#page-management-booking");
 					}else{
 						// if error
+						
 					console.log('error for deleting booking status!\n' + result);	
 					
 					}
 					
+					sembunyi('management-loading');
 					
 					
                 },
@@ -738,7 +1240,6 @@ function deleteDataServer(){
             });
 	
 }
-
 
 function grabDataAllBookingServer(){
 	
@@ -753,11 +1254,39 @@ function grabDataAllBookingServer(){
 					if(checkValidity(result)){
 						
 						extractDataToTable(result);
-						sembunyi('management-loading');
+						
 						
 					}
 					
 					//console.log(result);
+					sembunyi('management-loading');
+					
+                },
+                error : function(error) {
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function grabDataAllPasienServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/all',
+                dataType: 'json',
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						extractDataPasienToTable(result);
+						
+					}
+					
+					//console.log(result);
+					sembunyi('management-loading-pasien');
 					
                 },
                 error : function(error) {
@@ -788,7 +1317,6 @@ function checkValidity(dataCome){
 	
 }
 
-
 function formLoginValidation(){
 	
 	
@@ -813,7 +1341,7 @@ function formLoginValidation(){
 					
 					// check validity
 					if(checkValidity(result)){
-						$.mobile.changePage("#page-management-booking");
+						$.mobile.changePage("#page-menu-aksi");
 						// request data from Server
 						grabDataAllBookingServer();
 					}else{
@@ -823,6 +1351,7 @@ function formLoginValidation(){
                     
                 },
                 error : function(error) {
+					console.log(JSON.stringify(error));
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -833,6 +1362,37 @@ function formLoginValidation(){
 	
 }
 
+function extractDataResetToWhatsapp(result){
+	
+	console.log('extracting ' + JSON.stringify(result));
+	
+	var n = JSON.stringify(result);
+	var dataJSON = JSON.parse(n);
+	
+	var token = dataJSON.multi_data;
+	
+	var url = "https://rumahterapiherbal.web.id/p/reset-akun.html?token=" + token;
+	
+	var nLine = "ENTER";
+	var pesanAkhir = "Barusan Sistem Reset oleh *admin RTH!*" + nLine +
+				"untuk anda telah dilakukan. Silahkan klik link berikut untuk *Reset Password* " + nLine + 
+				" Akses Segera di :" + nLine +
+				url;
+	
+	var pesan = encodeURI(pesanAkhir).replaceAll("ENTER", "%0a");
+	var nomerAdmin = "6285871341474";
+	//https://api.whatsapp.com/send?phone=whatsappphonenumber&text=urlencodedtext
+	var url = "https://api.whatsapp.com/send?phone=" + nomerAdmin + "&text=" + pesan;	
+	
+	url_sembunyi = url;
+	setTimeout(visitWhatsappNotif, 3000);
+	
+	
+}
+
+function visitWhatsappNotif(){
+	window.parent.location.href = url_sembunyi;
+}
 
 function sembunyi(idNa){
 	var namina = '#' + idNa;

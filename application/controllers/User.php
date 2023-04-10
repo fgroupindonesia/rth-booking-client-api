@@ -138,9 +138,73 @@ class User extends CI_Controller {
 		 $token 		= $this->input->get('token');
 		 $email 		= $this->input->get('email');
 		
-		$endRespond = $this->UserModel->activateUser($email, $token);
+		 
+		 if(!isset($email)){
+			 // for user without email the password will be inputted by whatsapp
+			 // on the client end
+				$endRespond = $this->UserModel->activateUserNoEmail($token);
+		
+		 }else{
+				$endRespond = $this->UserModel->activateUser($email, $token);
+		
+		 }
+		
 			
 		echo json_encode($endRespond);
+	}
+	
+	public function directaktifasi(){
+		
+		$email = $this->input->post('email');
+		
+		$endRespond = $this->UserModel->activateUserDirectly($email);
+		
+		if($endRespond['status']='valid'){
+			$dataUser = $this->UserModel->getProfileBy('email', $email);
+			
+			$this->EmailModel->email_activated_success($email, $dataUser['multi_data']);
+		}
+		
+		echo json_encode($endRespond);
+		
+	}
+	
+	public function directnonaktifasi(){
+		
+		$id = $this->input->post('id');
+		
+		// without the token given
+		$endRespond = $this->UserModel->lockUserById($id);
+		
+		
+		echo json_encode($endRespond);
+		
+	}
+	
+	public function resetPassDirect(){
+		
+		// direct reset itu berarti sending token by whatsapp (json to client);
+		// link inside the whatsapp
+		$id	=	$this->input->post('id');
+		
+		$dataDB = $this->UserModel->getProfileBy('id',$id);
+		
+		// if fails then store it for later usage if it is invalid
+		$endRespond = $dataDB;
+		if($dataDB['status'] == 'valid'){
+				
+			$dataUser = $dataDB['multi_data'];
+			$username = $dataUser['username'];
+			
+			// this for locking purposes
+			// this 24 digit for URL Resetting Password
+			$token    = $this->generateToken(25);
+			$endRespond = $this->UserModel->lockUserByIdWithToken($id, $token);
+			// the token is given to the json as the output
+		}
+		
+		echo json_encode($endRespond);
+		
 	}
 	
 	// this is for CLIENT Reset Password Step-1 : posting form

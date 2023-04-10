@@ -50,7 +50,7 @@ class Schedule extends CI_Controller {
 		// 0 : female
 		// 1 : male
 		
-		$date_chosen 	= $this->input->post('date_chosen');
+		$date_chosen 		= $this->input->post('date_chosen');
 		$gender_therapist 	= $this->input->post('gender_therapist');
 		
 		$endRespond = $this->ScheduleModel->get($date_chosen, $gender_therapist);

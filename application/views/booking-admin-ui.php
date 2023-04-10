@@ -58,6 +58,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
 
+<section id="page-management-pasien" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Management Pasien</h1></header>
+<div  class="content" data-role="content" >
+	<h3>Pilih Akses Pasien</h3>
+	<p>Aktifkan masing-masing pasien (pengguna web portal ini)</p>
+	
+	<div id="management-loading-pasien"><img alt="loading image" src="/images/loading.gif" /><span>Loading...
+	</span></div>
+	
+	<div id="management-control-pasien">
+		<a id="link-reset" href="" data-transition="pop" >Reset Password</a>
+		<a href="" id="link-aktifasi">Aktifasi</a>
+		<a href="" id="link-non-aktifasi">Kunci</a>
+		<a href="" id="refresh-pasien">Refresh</a>
+	</div>
+	
+	<div class="ui-grid-d" id="pasien-table-head" >
+		<div class="ui-block-a"><b>ID</b></div>
+		<div class="ui-block-b"><b>FULLNAME</b></div>
+		<div class="ui-block-c"><b>CONTACT</b></div>
+		<div class="ui-block-d"><b>STATUS</b></div>
+		<div class="ui-block-e"><b>GENDER</b></div>
+	</div>
+	<a href="#page-menu-aksi"  data-inline="true" data-role="button">&lt;&lt; Kembali </a>
+	<a href="" id="link-calendar" data-inline="true" data-role="button">Kalendar</a>
+	<a href="" id="link-logout" data-inline="true" data-role="button">- Logout -</a>
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
 <section id="page-management-booking" data-role="page">
 <header data-role="header" data-position="fixed"><h1>Management Booking Request</h1></header>
 <div  class="content" data-role="content" >
@@ -81,9 +111,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="ui-block-d"><b>SCHEDULE DATE</b></div>
 		<div class="ui-block-e"><b>STATUS</b></div>
 	</div>
-	
+	<a href="#page-menu-aksi"  data-inline="true" data-role="button">&lt;&lt; Kembali </a>
 	<a href="" id="link-calendar" data-inline="true" data-role="button">Kalendar</a>
-	<a href="" id="link-logout" data-inline="true" data-role="button">Logout &#60;&#60;</a>
+	<a href="" id="link-logout" data-inline="true" data-role="button">- Logout -</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
@@ -92,9 +122,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <header data-role="header" data-position="fixed"><h1>Booking Request</h1></header>
 <div  class="content" data-role="content" >
 	<h3>Update Status</h3>
+	<span hidden id="upstat-id-treatment" ></span>
+	<span hidden id="upstat-computer-date-treatment" ></span>
+	<span hidden id="upstat-computer-hour-treatment" ></span>
+	<span hidden id="upstat-gender-treatment" ></span>
 	<img alt="write image" src="/images/write.png"/>
-	<p >Kode : <span id="upstat-code-treatment">xxx</span> untuk 
-	<b><span id="upstat-username-treatment">xxx </span></b> pada
+	<p><b>Kode : <span id="upstat-code-treatment">xxx</span></b> untuk 
+	<b><span id="upstat-username-treatment">xxx </span></b> pada <br>
 	<b><span id="upstat-schedule-treatment">xxx </span></b>.
 	</p>
 	
@@ -110,6 +144,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
 
+<section id="page-menu-aksi" data-close-btn="right" data-role="page" >
+<header data-role="header" data-position="fixed"><h1>Management</h1></header>
+<div  class="content" data-role="content" >
+	<h3>Menu Aksi</h3>
+	<p>Klik salah satu pilihan untuk mengatur data </p>
+<a href="#page-management-pasien" id="link-management-pasien" data-inline="true" data-role="button">Seluruh Pasien</a>	
+<a href="#page-management-booking" data-inline="true" data-role="button">Seluruh Booking</a>
+
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
 <section id="page-detail" data-role="page">
 <header data-role="header" data-position="fixed"><h1>Detail Spesifik</h1></header>
 <div  class="content" data-role="content" >
@@ -118,85 +164,85 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<span id="detail-error" class="pesan-error" >Error!</span>	</h3>
 	<span id="detail-tanggal-computer" hidden>  </span>
 	
-	<div class="ui-grid-a">
+	<div class="ui-grid-a" id="data-jam8">
 		<div class="ui-block-a">
 		<label for="flip-jam8" >08:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" data-id="" id="flip-jam8" class="slider-jam" data-role="slider">
+		<select name="slider" data-id="" data-jam="08:00" id="flip-jam8" class="slider-jam" data-role="slider">
 			<option value="0">Off</option>
 			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea class="detail-description">
+		<textarea data-id="" data-jam="08:00" id="detail-description-jam8" class="detail-description">
 		</textarea>
 		</div>
 	</div>
 	
-	<div class="ui-grid-a">
+	<div class="ui-grid-a" id="data-jam10">
 		<div class="ui-block-a">
 		<label for="flip-jam10" >10:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" data-id="" id="flip-jam10" class="slider-jam" data-role="slider">
+		<select name="slider" data-id="" data-jam="10:00" id="flip-jam10" class="slider-jam" data-role="slider">
 			<option value="0">Off</option>
 			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea class="detail-description" >
+		<textarea data-id="" data-jam="10:00" id="detail-description-jam10" class="detail-description" >
 		</textarea>
 		</div>
 	</div>
 	
 	
-	<div class="ui-grid-a">
+	<div class="ui-grid-a" id="data-jam13">
 		<div class="ui-block-a">
 		<label for="flip-jam13" >13:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" data-id="" id="flip-jam13" class="slider-jam" data-role="slider">
+		<select name="slider" data-id="" data-jam="13:00" id="flip-jam13" class="slider-jam" data-role="slider">
 			<option value="0">Off</option>
 			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea class="detail-description" >
+		<textarea data-id="" data-jam="13:00" id="detail-description-jam13" class="detail-description" >
 		</textarea>
 		</div>
 	</div>
 	
 	
-	<div class="ui-grid-a">
+	<div class="ui-grid-a" id="data-jam16">
 		<div class="ui-block-a">
 		<label for="flip-jam16" >16:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" data-id="" id="flip-jam16" class="slider-jam" data-role="slider">
+		<select name="slider" data-id="" data-jam="16:00" id="flip-jam16" class="slider-jam" data-role="slider">
 			<option value="0">Off</option>
 			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea class="detail-description" >
+		<textarea data-id="" data-jam="16:00" id="detail-description-jam16" class="detail-description" >
 		</textarea>
 		</div>
 	</div>
 	
 	
-	<div class="ui-grid-a">
+	<div class="ui-grid-a" id="data-jam20">
 		<div class="ui-block-a">
 		<label for="flip-jam20" >20:00</label>
 		</div>
 		<div class="ui-block-b"> 
-		<select name="slider" id="flip-jam20" class="slider-jam" data-role="slider">
+		<select name="slider" data-id="" data-jam="20:00" id="flip-jam20" class="slider-jam" data-role="slider">
 			<option value="0">Off</option>
 			<option value="1">On</option>
 		</select>
 		</div>
 		<div class="ui-block-c">
-		<textarea >
+		<textarea data-id="" data-jam="20:00" id="detail-description-jam20" class="detail-description" >
 		</textarea>
 		</div>
 	</div>
@@ -205,7 +251,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<label></label>
 	</div>
 	
-	<a href="#" id="link-kembali-kalendar" data-inline="true" data-role="button">Kembali</a>
+	<a href="#" id="link-kembali-kalendar" data-inline="true" data-role="button">&lt;&lt; Kembali</a>
 	<a href="#page-terapkan-serupa" data-transition="dialog" id="link-terapkan-lainnya" data-inline="true" data-role="button">Terapkan Serupa Lainnya</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
