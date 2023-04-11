@@ -105,7 +105,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<input id="profil_id" name="profil_id" type="hidden" value="" />
 	<input id="profil_status" name="profil_status" type="hidden" value="" />
 	<input id="profil_membership" name="profil_membership" type="hidden" value="" />
-	<input id="profil_full_name" name="profil_membership" type="hidden" value="" />
+	<input id="profil_full_name" name="profil_full_name" type="hidden" value="" />
 	
 	<div data-role="fieldcontain">
 	<label for="profil_username">Username:</label>

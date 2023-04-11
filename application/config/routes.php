@@ -58,3 +58,5 @@ $route['user/activate/now'] = 'User/directaktifasi';
 $route['user/disactivate/now'] = 'User/directnonaktifasi';
 $route['user/resetpass/via/email'] = 'User/resetPass';
 $route['user/resetpass/via/chat'] = 'User/resetPassDirect';
+$route['user/resetpass/update'] = 'User/updatePass';
+$route['user/resetpass/form'] = 'User/renderResetForm';

@@ -135,21 +135,23 @@ class User extends CI_Controller {
 	// this is for CLIENT Reset Password Step-2 : clicking GET URL
 	public function aktifasi(){
 		
+		header("Access-Control-Allow-Origin: *");
+		header("Access-Control-Allow-Methods: GET, OPTIONS");
+		
 		 $token 		= $this->input->get('token');
-		 $email 		= $this->input->get('email');
-		
 		 
-		 if(!isset($email)){
-			 // for user without email the password will be inputted by whatsapp
-			 // on the client end
-				$endRespond = $this->UserModel->activateUserNoEmail($token);
+		 $dataUser = $this->UserModel->getProfileBy('token', $token);
+		 
+		 $endRespond = $this->UserModel->activateUserNoEmail($token);	
 		
-		 }else{
-				$endRespond = $this->UserModel->activateUser($email, $token);
-		
-		 }
-		
+		if($endRespond['status']=='valid'){
+			$email = $dataUser['multi_data']['email'];
 			
+			if(!empty($email)){
+			$this->EmailModel->email_activated_success($email, $dataUser['multi_data']);
+			}
+		}
+		
 		echo json_encode($endRespond);
 	}
 	
@@ -233,6 +235,22 @@ class User extends CI_Controller {
 		
 	}
 	
+	public function renderResetForm(){
+		
+		$token = $this->input->get('token');
+		
+		$data = array(
+			'token' => $token
+		);
+		
+		if(isset($token)){
+		$this->load->view('renew-pass', $data);
+		}else{
+			echo "token error!";
+		}
+		
+	}
+	
 	// this is for CLIENT Reset Password Step-3 : submit form
 	public function updatePass(){
 		
@@ -241,17 +259,28 @@ class User extends CI_Controller {
 		
 		$dataUser = $this->UserModel->getProfileBy('token', $token);
 		
+		if(isset($dataUser['multi_data'])){
+		
 		$emailna = $dataUser['multi_data']['email'];
 		$phone =  $dataUser['multi_data']['contact'];
 		
 		// update the password, and the status to be active inside
 		// given by its token 
+		// so the token will be cleared
 		$endRespond = $this->UserModel->updatePassword($pass, $token);
 		
+		if(isset($emailna) && !empty($emailna)){
 		// send the email notification too
 		$this->EmailModel->email_updated_pass($emailna, $phone, $pass);	
-			
+		}		
+		
 		echo json_encode($endRespond);
+		
+		}else{
+			// once the token is invalid
+			// we say it loud to the client
+			echo json_encode($dataUser);
+		}
 		
 	}
 	
@@ -333,10 +362,13 @@ class User extends CI_Controller {
 		$id 	= $this->input->post('id');
 		$us 	= $this->input->post('username');
 		
-		$dataUsed = $this->UserModel->getProfile($id);
+		$dataUsed = null;
 		
+		if(isset($id)){
+		$dataUsed = $this->UserModel->getProfile($id);
+		}
 		// try once more
-		if($dataUsed['status'] == 'invalid' && isset($us)){
+		if($dataUsed['status'] == 'invalid' || isset($us)){
 			$dataUsed = $this->UserModel->getProfileBy('username', $us);
 		}
 		

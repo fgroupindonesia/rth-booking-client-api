@@ -82,7 +82,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="ui-block-e"><b>GENDER</b></div>
 	</div>
 	<a href="#page-menu-aksi"  data-inline="true" data-role="button">&lt;&lt; Kembali </a>
-	<a href="" id="link-calendar" data-inline="true" data-role="button">Kalendar</a>
+	<a href="" class="link-calendar" data-inline="true" data-role="button">Kalendar</a>
 	<a href="" id="link-logout" data-inline="true" data-role="button">- Logout -</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -112,7 +112,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class="ui-block-e"><b>STATUS</b></div>
 	</div>
 	<a href="#page-menu-aksi"  data-inline="true" data-role="button">&lt;&lt; Kembali </a>
-	<a href="" id="link-calendar" data-inline="true" data-role="button">Kalendar</a>
+	<a href="" class="link-calendar" data-inline="true" data-role="button">Kalendar</a>
 	<a href="" id="link-logout" data-inline="true" data-role="button">- Logout -</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -349,6 +349,94 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
+
+<section id="page-booking-detail" data-role="page">
+<header data-role="header" data-position="fixed"><h1>Booking Detail</h1></header>
+<div  class="content" data-role="content" >
+	
+	<div id="booking-detail-loading"><img alt="loading image" src="/images/loading.gif" /><span>Loading...
+	</span></div>
+	
+	<div id="booking-detail-data">
+	<h3>Code : <span id="booking-detail-code"> </span></h3>
+	<img alt="write image" src="/images/write.png"/>
+	<p>Dibooking untuk jadwal : <b><span id="booking-detail-schedule-date"> </span></b> 
+	oleh : <b><span id="booking-detail-fullname" > </span></b> .</p>
+	<p id="booking-detail-treatment">Untuk Treatment: <br></p>
+	</div>
+	
+	<a href="#page-management-booking" data-inline="true" data-role="button">kembali &#60;&#60;</a>
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
+<section id="page-user-detail" data-role="page">
+<header data-role="header" data-position="fixed"><h1>User Detail</h1></header>
+<div  class="content" data-role="content" >
+	<h3><span id="profil_fullname_span">Profil</span></h3>
+	<img alt="image profil" id="image-profil" src="/images/user_48.png"/>
+	
+	<div id="user-detail-loading"><img alt="loading image" src="/images/loading.gif" /><span>Loading...
+	</span></div>
+	
+	<div id="user-detail-data">
+	<form id="form-profil" method="post" data-ajax="false" >
+	
+	<input id="profil_id" name="profil_id" type="hidden" value="" />
+	<input id="profil_status" name="profil_status" type="hidden" value="" />
+	<input id="profil_membership" name="profil_membership" type="hidden" value="" />
+	<input id="profil_full_name" name="profil_full_name" type="hidden" value="" />
+	
+	<div data-role="fieldcontain">
+	<label for="profil_username">Username:</label>
+	<input type="text" readonly name="profil_username" placeholder="ketik disini" id="profil_username" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_pass">Password:</label>
+	<input type="password" name="profil_pass" placeholder="ketik disini" id="profil_pass" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_email">Email:</label>
+	<input type="text" name="profil_email" placeholder="ketik disini" id="profil_email" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_home_address">Address:</label>
+	<input type="text" name="profil_home_address" placeholder="ketik disini" id="profil_home_address" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_contact">No Whatsapp:</label>
+	<input type="text" name="profil_contact" placeholder="ketik disini" id="profil_contact" />
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label for="profil_gender">Gender:</label>
+	<select id="profil_gender" name="profil_gender" >
+		<option value="1">Ikhwan</option>
+		<option value="0">Akhwat</option>
+	</select>
+	</div>
+	
+	<div data-role="fieldcontain">
+	<label >Tanggal Mendaftar:</label>
+	<span id="profil_date_created"> </span>
+	</div>
+	
+
+	<input id="tombol-profil-submit" data-inline="true" data-role="submit" type="submit" value="save">
+	
+	</form></div>
+	
+	<a href="#page-management-pasien" data-inline="true" data-role="button">kembali &#60;&#60;</a>
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
 
 </body>
 </html>

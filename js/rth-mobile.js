@@ -4,6 +4,7 @@ var jadwal_sembunyi = "";
 var gender_sembunyi = "";
 var month_year_sembunyi = "";
 var hubungan_sembunyi = "";
+var tanggal_sembunyi = "";
 var modePendaftaran = "";
 var kiriman = "";
 var pakaiEmail = true;
@@ -120,6 +121,7 @@ function aktifkanPilihanSiapaTerapi(){
 	$("#link-pilih-anggota").click(function() {
 	
 		var namaUser = $('#sembunyi-username').text();
+		tanggal_sembunyi = $('#pilih-tanggal').val();
 		
 		kiriman = {};
 		kiriman.username_incharge = namaUser;
@@ -447,13 +449,21 @@ function aktifinTombolJam(data){
 	// reset counter
 	jumlahJamTersedia = 5;
 	
+	// only shown the data of the selected date
+	
+	
 	var i=0;
 	for(i = 0; i<dataJSON.multi_data.length; i++){
 		
 		var jam = dataJSON.multi_data[i].specific_hour;
 		var stat = dataJSON.multi_data[i].status;
+		var dateNa = dataJSON.multi_data[i].date_chosen;
+		var genderNa = dataJSON.multi_data[i].gender_therapist;
 		
-		setKetersediaan(jam, stat);
+		if(dateNa == tanggal_sembunyi){
+			console.log('ketemu tanggal yg sama ' + tanggal_sembunyi + " " + jam + " " + stat);
+			setKetersediaan(jam, stat);
+		}
 		
 	}
 	
@@ -481,19 +491,37 @@ function setKetersediaan(jm, st){
 	
 }
 
-
+function asJam(angka){
+	
+	var hasil = "";
+	
+	if(angka<10){
+		hasil = "0" + angka + ":00";
+	}else{
+		hasil = angka + ":00";
+	}
+	
+	return hasil;
+	
+}
 
 function tersedia(angka, stat){
 	
 	var sel = '#jam'+ angka + ' .status';
 	var tombol = '#jam' + angka + ' .tombol-booking';
+	var dicari = ".tombol-booking[data-jam='" + asJam(angka) + "']";
 	
-			if(stat == 0){
+	//console.log('pencarian ' + angka + ' dengan ' + dicari);
+	
+			if(stat == 1){
 				$(sel).text("TERPAKAI");
 				$(sel).addClass('red');
 				$(sel).removeClass('bold');
 				
 				//sembunyiParentDiv(tombol);
+				
+				$(dicari).hide();
+				
 				jumlahJamTerpakai++;
 				
 				jumlahJamTersedia -= jumlahJamTerpakai;
@@ -503,6 +531,8 @@ function tersedia(angka, stat){
 				
 				$(sel).addClass('bold');
 				$(sel).removeClass('red');
+				
+				$(dicari).show();
 			}
 }
 
@@ -1641,7 +1671,7 @@ function remakeDataFormProfil(){
 	kiriman.email = $('#profil_email').val();
 	kiriman.home_address = $('#profil_home_address').val();
 	kiriman.contact = $('#profil_contact').val();
-	kiriman.full_name = $('#profil_fullname_span').text();
+	kiriman.full_name = $('#profil_full_name').val();
 	kiriman.gender = $('#profil_gender').val();
 	
 	return kiriman;

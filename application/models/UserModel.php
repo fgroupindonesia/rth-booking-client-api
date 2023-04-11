@@ -113,7 +113,8 @@ class UserModel extends CI_Model {
 		
 		$data = array(
 			'pass' 		=> $pass,
-			'status'	=> 'active'
+			'status'	=> 'active',
+			'token'		=> ''
 		);
 		
 		$this->db->where('token', $token);

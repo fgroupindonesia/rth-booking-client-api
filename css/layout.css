@@ -64,6 +64,14 @@ label.error {
 	padding-left: 20px;;
 }
 
+.tombol-booking{
+	background: url('/images/wa_28.png') no-repeat 5px center;
+	background-size: 18px 18px;
+	background-position: left;
+	padding-left: 20px;
+	display: none;
+}
+
 
 #refresh-all {
 	background: url('/images/refresh.png') no-repeat 5px center;

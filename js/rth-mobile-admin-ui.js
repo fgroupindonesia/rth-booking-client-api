@@ -12,6 +12,7 @@ $(document).ready(function(){
 	setTimeout(nextPage1, 3000);
 	
 	formLoginValidation();
+	formProfilValidation();
 	
 	registerEventClick();
 	
@@ -297,6 +298,88 @@ function resetDetailForm(){
 	$('.detail-description').val('');
 }
 
+function remakeDataFormProfil(){
+	
+	kiriman = {};
+	kiriman.id = $('#profil_id').val();
+	kiriman.membership = $('#profil_membership').val();
+	kiriman.status = $('#profil_status').val();
+	kiriman.username = $('#profil_username').val();
+	kiriman.pass = $('#profil_pass').val();
+	kiriman.email = $('#profil_email').val();
+	kiriman.home_address = $('#profil_home_address').val();
+	kiriman.contact = $('#profil_contact').val();
+	kiriman.full_name = $('#profil_full_name').val();
+	kiriman.gender = $('#profil_gender').val();
+	
+	return kiriman;
+	
+}
+
+function clearFormProfil(){
+	
+	$("#form-profil").each(function(){this.reset();});
+	
+}
+
+function formProfilValidation(){
+	
+	//alert('sedang validating...');
+	
+	// this is for form-login
+	 $("#form-profil").validate({
+        rules: {
+			profil_pass: "required",
+			profil_full_name: "required",
+			profil_home_address: "required",
+			profil_contact: "required"
+        },
+        messages: {
+			profil_pass: "Tulis password pakai kombinasi huruf dan angka!",
+			profil_full_name: "Tulis nama lengkapnya",
+			profil_home_address: "Alamat lengkap anda dimana?",
+			profil_contact: "Nomor whatsappnya?"
+        },
+		submitHandler: function(form) {
+			
+			// remake the data from the form-profil
+			kiriman = remakeDataFormProfil();
+			
+			$.ajax({
+                type: 'POST',
+                url: '/user/update',
+                dataType: 'json',
+				data: kiriman,
+                //data: $('#form-profil').serialize(),
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						$.mobile.changePage("#page-management-pasien");
+						
+						refreshDataPasienTable();
+					
+					}
+					
+					// clearup
+					clearFormProfil();
+					console.log('dapet na ' + JSON.stringify(result));
+                    
+                },
+                error : function(error) {
+					console.log(error);
+					//alert(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+			
+		}
+    });
+	
+	
+}
+
 function switchClass(jam, tongol3Kolom){
 	
 	if(tongol3Kolom == false){
@@ -308,7 +391,120 @@ function switchClass(jam, tongol3Kolom){
 	}
 }
 
+function extractDataProfil(dataCome){
+	
+	var n = JSON.stringify(dataCome);
+    var data = JSON.parse(n); // Try to parse the response as JSON
+	
+	var isiNa = data.multi_data;
+	
+	$('#profil_username').val(isiNa.username);
+	$('#profil_pass').val(isiNa.pass);
+	$('#profil_email').val(isiNa.email);
+	$('#profil_home_address').val(isiNa.home_address);
+	$('#profil_contact').val(isiNa.contact);
+	$('#profil_full_name').val(isiNa.full_name);
+	$('#profil_fullname_span').text(isiNa.full_name);
+	
+	$('#profil_date_created').text(konversiAsHuman(isiNa.created_date));
+	
+	// this is hidden
+	$('#profil_id').val(isiNa.id);
+	$('#profil_membership').val(isiNa.membership);
+	$('#profil_status').val(isiNa.status);
+	
+	
+	var opsi = 'value=' + isiNa.gender;
+	$('#profil_gender option['+opsi+']').prop('selected', true);
+	$('#profil_gender').selectmenu('refresh', true);
+	
+	
+	var imageNa = "";
+	// change the img of this elemen
+	if(isiNa.gender == 0){
+			imageNa = "female.png";
+	}else{
+			imageNa = "male.png";
+	}
+	
+	$('#image-profil').attr('src', '/images/'+imageNa);
+	
+}
+
+function grabDataUserProfilServer(){
+	
+	
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/profile',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						extractDataProfil(result);
+						tampilin('user-detail-data');
+						
+					}
+					
+					sembunyi('user-detail-loading');
+					
+					//console.log(result);
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+
 function registerEventClick(){
+
+$(document).on("click", ".pasien-fullname a" , function() {
+			 
+			 var fullname = $(this).text();
+			 var noID = $(this).attr('data-id');
+			 
+			 kiriman = {};
+			 kiriman.id = noID;
+			 
+			 console.log('akan kirimkan request user detail ' + JSON.stringify(kiriman));
+			 
+			 sembunyi('user-detail-data');
+			 tampilin('user-detail-loading');
+			 
+			 setTimeout(grabDataUserProfilServer, 2000);
+			 
+			 
+ });
+
+
+ $(document).on("click", ".treatment-code a" , function() {
+			 
+			 var codeNa = $(this).text();
+			 var noID = $(this).attr('data-id');
+			 
+			 kiriman = {};
+			 kiriman.code = codeNa;
+			 kiriman.id = noID;
+			 
+			 //console.log('akan kirimkan treatment code ' + JSON.stringify(kiriman));
+			 
+			 sembunyi('booking-detail-data');
+			 tampilin('booking-detail-loading');
+			 
+			 setTimeout(grabDataBookingDetailServer, 2000);
+			 
+			 
+ });
+
 	
 $("#link-kembali-kalendar").bind("click", function() {
 	
@@ -424,7 +620,7 @@ $(document).on( "slidestop",  ".slider-jam" ,function( event, ui ) {
 	
 });
 
-$("#link-calendar").bind("click", function() {
+$(".link-calendar").bind("click", function() {
 	
 	$.mobile.changePage("#page-kalendar");
 	
@@ -627,6 +823,106 @@ $("#link-reset").bind("click", function() {
 	
 });
 		
+}
+
+
+function grabDataBookingDetailServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/booking/detail',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						// we set the number of family
+						var n = JSON.stringify(result);
+						var dataJSON = JSON.parse(n);
+						
+						var data = dataJSON.multi_data;
+						var c = data.code;
+						var sc = data.schedule_date;
+						var fname = data.full_name;
+						// extract data
+						
+						$('#booking-detail-code').text(c);
+						$('#booking-detail-schedule-date').text(konversiAsHumanWithHour(sc));
+						$('#booking-detail-fullname').text(fname);
+						
+						console.log('kita ada ' + JSON.stringify(data));
+						
+						var tr  = "<b>Untuk Treatment:</b> <br>";
+						tr += extractTreatment(data);
+						tr = tr.replaceAll("ENTER", "<br>");
+						
+						$('#booking-detail-treatment').html(tr);
+						
+						tampilin('booking-detail-data');
+						sembunyi('booking-detail-loading');
+						
+					}else{
+						// tampilkan error
+						
+					}
+					
+                },
+                error : function(error) {
+					console.log(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function extractTreatment(dataObject){
+	
+	var nLine = "ENTER";
+	var pesanManusiawi = "";
+	
+	var tdk_umum = dataObject.treatment.tindakan_umum;
+	var bekam = dataObject.treatment.bekam;
+	var ruqyah = dataObject.treatment.ruqyah;
+	var elektrik = dataObject.treatment.elektrik;
+	var fashdu = dataObject.treatment.fashdu;
+	var lintah = dataObject.treatment.lintah;
+	var pijat = dataObject.treatment.pijat;
+	
+	
+	if(tdk_umum == 1){
+		pesanManusiawi += "- Tindakan Umum" + nLine;
+	}
+	
+	if(pijat == 1){
+		pesanManusiawi += "- Pijat FullBody" + nLine;
+	}
+	
+	if(bekam == 1){
+		pesanManusiawi += "- Bekam" + nLine;
+	}
+	
+	if(lintah == 1){
+		pesanManusiawi += "- Therapy Lintah" + nLine;
+	}
+	
+	if(fashdu == 1){
+		pesanManusiawi += "- Fashdu" + nLine;
+	}
+	
+	if(elektrik == 1){
+		pesanManusiawi += "- Therapy Elektrik" + nLine;
+	}
+	
+	if(ruqyah == 1){
+		pesanManusiawi += "- Plus Ruqyah" + nLine;
+	}
+	
+	return pesanManusiawi;
+	
+	
 }
 
 function convertDayEnglishToIndo(dayName){
@@ -966,9 +1262,10 @@ function extractDataPasienToTable(dataCome){
 		
 		var chk = "<input class='pasien-id' type='checkbox' value='" +isiNa[p].id + "'/>";
 		
+		var linkFullname = "<a href='#page-user-detail' data-id='"+ isiNa[p].id  +"'>" +isiNa[p].full_name + "</a>";
 		
 		var id = "<div class='ui-block-a'>" + chk + "</div>";
-		var fullname = "<div class='ui-block-b pasien-fullname'>" + isiNa[p].full_name + "</div>";
+		var fullname = "<div class='ui-block-b pasien-fullname'>" + linkFullname + "</div>";
 		var contact = "<div class='ui-block-c pasien-contact'>" + isiNa[p].contact + "</div>";
 		
 		var classGender = "pasien-female";
@@ -1035,10 +1332,10 @@ function extractDataToTable(dataCome){
 		
 		var genderHidden = "<span hidden class='treatment-gender'>" + isiNa[p].gender + "</span>";
 		
-		
+		var linkNa = "<a data-id='"+ isiNa[p].id +"' href='#page-booking-detail' >" + isiNa[p].code + "</a>";
 		
 		var id = genderHidden + "<div class='ui-block-a'>" + chk + "</div>";
-		var code = "<div class='ui-block-b treatment-code'>" + isiNa[p].code + "</div>";
+		var code = "<div class='ui-block-b treatment-code'>" + linkNa + "</div>";
 		var usname = "<div class='ui-block-c treatment-username "+ classGender +"'>" + isiNa[p].username + "</div>";
 		
 		var tgl = konversiAsHumanWithHour(isiNa[p].schedule_date);

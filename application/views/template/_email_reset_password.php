@@ -2,9 +2,9 @@
 Reset Password Akun
 -----------------------------------------------------------
 
-Hi!
-Barusan anda melakukan request Reset Password pada <?= $date; ?> 
-untuk akun milik: 
+Assalamu'alaikum,
+
+Barusan anda melakukan request Reset Password pada <?= $date; ?> untuk akun milik: 
 
 Username : <?= $username; ?> 
 
@@ -20,6 +20,6 @@ Wa barakallahu fiikum.
 Automatic Support System
 RTH - Rumah Terapi Herbal.
 
-
------------------------------------------------------------
-(c) Integrated System 2023 developed by FGroupIndonesia
+<?php
+	$this->load->view('template/_footer');
+?>

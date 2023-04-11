@@ -1,4 +1,4 @@
 git add .
-git commit -m "Admin Control for resetting & activating user is accomplished!"
+git commit -m "Ready to launch!!"
 git push origin main --force
 git gc --prune
