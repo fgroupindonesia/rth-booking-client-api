@@ -102,18 +102,20 @@ class ScheduleModel extends CI_Model {
 		
 	}
 	
-	private function getFullname($codeBooking){
+	private function getFullnameByCode($codeBooking){
 		
 		$hasil = "";
+		$username = "";
 		
 		$this->db->where('code', $codeBooking);
 		$query = $this->db->get('rth_booking_request');
 		
-		$username = "";
+		
 		foreach ($query->result() as $row)
 		{
 		
 			$username = $row->username;
+			break;
 		
 		}
 		
@@ -122,12 +124,15 @@ class ScheduleModel extends CI_Model {
 			$this->db->where('username', $username);
 			$query = $this->db->get('rth_users');
 			
-			$username = "";
+		
 			foreach ($query->result() as $row)
 			{
 				$hasil = $row->full_name;
+				break;
 			}
 		
+		}else{
+			$hasil = $username;
 		}
 		
 		return $hasil;
@@ -138,7 +143,7 @@ class ScheduleModel extends CI_Model {
 		
 		$stat = 'invalid';
 		
-		$namaOrang = $this->getFullname($codeBooking);
+		$namaOrang = $this->getFullnameByCode($codeBooking);
 		
 		$data = array(
 				'status' 			=> $status,

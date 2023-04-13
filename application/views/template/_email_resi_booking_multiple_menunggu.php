@@ -1,20 +1,20 @@
 -----------------------------------------------------------
-Resi Booking Jadwal
+Booking Jadwal Sedang Diproses
 -----------------------------------------------------------
 
 Walhamdulillah,
-Ini merupakan Jadwal Anda:
+Kami sedang memproses Request Booking Jadwal Anda & Anggota:
 
 Kode Booking	: <?=$kodebooking;?> 
-Nama Pasien 	: <?=$fullname;?> 
+Nama Pasien 	: <?=$fullname;?>
+Beserta Anggota	: <?=$anggota;?>
 Booking Jadwal 	: <?=$jadwalbooking;?> 
 Tindak Terapi 	:  
 <?=$tindakterapi;?> 
 
-Ingat untuk tidak melakukan makan dalam waktu dekat (60 menit)sebelum terapi demi kemudahan prosesi tindak terapi saat berlangsung.
+Status Booking 	: SEDANG DIPROSES.
 
-Ketentuan lainnya yang harus dipenuhi dapat disimak di Klik tautan ini<https://www.rumahterapiherbal.web.id/p/ketentuan-wajib-ditaati.html> .
-
+Harap menunggu konfirmasi dari kami untuk beberapa saat agar jadwal ini dapat diproses. Semoga Allah beri kemudahan bagi semuanya.
 
 Terima kasih,
 Wa barakallahu fiikum. 

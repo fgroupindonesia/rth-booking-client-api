@@ -9,8 +9,6 @@ Walhamdulillah wa syukurillah,
 akun kamu baru saja dibuat untuk :
 
 Username : <?=$username;?> 
-Nomor HP : <?=$nohp;?> 
-Password : <?=$pass;?> 
 
 Klik disini<https://rumahterapiherbal.web.id/p/aktifasi.html?token=<?=$token;?>>  untuk aktifasi akunnya segera!
 

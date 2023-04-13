@@ -52,6 +52,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+$route['booking/check/acceptance'] = 'Booking/checkAcceptance';
+$route['booking/send/notification'] = 'Booking/sendNotification';
 $route['user/test'] = 'User/test';
 $route['user/activate'] = 'User/aktifasi';
 $route['user/activate/now'] = 'User/directaktifasi';

@@ -11,6 +11,7 @@ class EmailModel extends CI_Model {
 	
 	private $debugModeHere = false;
 	private $disableEmailHere = false;
+	private $emailAdministrator = "rumahterapiherbalbandung@gmail.com";
 	
 	// DEBUGMODE TRUE is so PRINTOUT the email content but NO SENDING
 	// DEBUGMODE FALSE && DisableEmail is FALSE so it will SEND EMAIL
@@ -31,6 +32,10 @@ class EmailModel extends CI_Model {
 	
 	private function isDebugMode(){
 		return $this->debugModeHere;
+	}
+	
+	private function getEmailAdministrator(){
+		return $this->emailAdministrator;
 	}
 	
 	
@@ -57,6 +62,63 @@ class EmailModel extends CI_Model {
 		
 	}
 	
+	public function email_resi_booking_notif_admin($tindakterapi, $jadwalbooking, $kodebooking, $fullname){
+	
+		$title = "Booking Jadwal Order";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'fullname' => $fullname
+		);
+		
+		$emailAdmin = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_menunggu', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($emailAdmin, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_register_success_notif_admin($tanggal, $fullname, $gender, $married, $nohp, $address, $keluhan, $dataUmum, $dataKhusus){
+
+		$title = "Barusan Pasien Baru Terdaftar!";
+
+		$dataArray = array(
+			'tanggal' => $tanggal,
+			'fullname' => $fullname,
+			'gender' => $gender,
+			'married' => $married,
+			'nohp' => $nohp,
+			'address' => $address,
+			'keluhan' => $keluhan,
+			'stat_merokok' => $dataUmum['merokok'],
+			'stat_inap' => $dataUmum['inap'],
+			'stat_bius' => $dataUmum['bius'],
+			'stat_tbc' => $dataUmum['tbc'],
+			'stat_kanker' => $dataUmum['kanker'],
+			'stat_jantung' => $dataUmum['jantung'],
+			'stat_stroke' => $dataUmum['stroke'],
+			'stat_anjuran' => $dataUmum['anjuran'],
+			'stat_ritual' => $dataKhusus['ritual'],
+			'stat_td' => $dataKhusus['td'],
+			'stat_mimpi' => $dataKhusus['mimpi'],
+			'stat_paranormal' => $dataKhusus['paranormal'],
+			'stat_ghaib' => $dataKhusus['ghaib']
+		);
+		
+		$emailAdmin = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_registered_success_admin', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($emailAdmin, $title, $emailKonten);
+		
+		return true;
+	}
+	
 	public function email_cancel_booking($email, $kodebooking, $fullname, $jadwalbooking, $tindakterapi){
 
 		$title = "Pembatalan Booking Jadwal";
@@ -75,9 +137,9 @@ class EmailModel extends CI_Model {
 		return true;
 	}
 	
-	public function email_resi_booking($email, $tindakterapi, $jadwalbooking, $kodebooking, $fullname){
+	public function email_resi_booking_sendiri_menunggu($email, $tindakterapi, $jadwalbooking, $kodebooking, $fullname){
 	
-		$title = "Resi Booking Jadwal";
+		$title = "Booking Jadwal Sedang Diproses";
 	
 		$dataArray = array(
 			'tindakterapi' => $tindakterapi,
@@ -86,13 +148,242 @@ class EmailModel extends CI_Model {
 			'fullname' => $fullname
 		);
 		
-		$emailKonten = $this->load->view('template/_email_resi_booking', $dataArray, TRUE);
+		$emailKonten = $this->load->view('template/_email_resi_booking_sendiri_menunggu', $dataArray, TRUE);
 		
 		$this->printOrSendEmail($email, $title, $emailKonten);
 		
 		
 		return true;
 	}
+	
+	public function email_resi_booking_sendiri_success($email, $tindakterapi, $jadwalbooking, $kodebooking, $fullname){
+	
+		$title = "Booking Jadwal Berhasil";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'fullname' => $fullname
+		);
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_sendiri_success', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_multiple_menunggu($email, $tindakterapi, $jadwalbooking, $kodebooking, $anggota, $fullname){
+	
+		$title = "Booking Jadwal Sedang Diproses";
+	
+		$dataArray = array(
+			'fullname'	=> $fullname,
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota
+		);
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_multiple_menunggu', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_multiple_success($email, $tindakterapi, $jadwalbooking, $kodebooking, $anggota, $fullname){
+	
+		$title = "Booking Jadwal Berhasil";
+	
+		$dataArray = array(
+			'fullname'	=> $fullname,
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota
+		);
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_multiple_success', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_anggota_only_menunggu($email, $tindakterapi, $jadwalbooking, $kodebooking, $anggota){
+	
+		$title = "Booking Jadwal Sedang Diproses";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota
+		);
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_anggota_only_menunggu', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_anggota_only_success($email, $tindakterapi, $jadwalbooking, $kodebooking, $anggota){
+	
+		$title = "Booking Jadwal Berhasil";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota
+		);
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_anggota_only_success', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_sendiri_admin($tindakterapi, $jadwalbooking, $kodebooking, $fullname){
+	
+		$title = "Booking Jadwal Order";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'fullname' => $fullname
+		);
+		
+		$email = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_sendiri_admin', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_sendiri_admin_success($tindakterapi, $jadwalbooking, $kodebooking, $fullname){
+	
+		$title = "Booking Jadwal Order Success";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'fullname' => $fullname
+		);
+		
+		$email = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_sendiri_admin_success', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	
+	}
+	
+	public function email_resi_booking_anggota_only_admin($tindakterapi, $jadwalbooking, $kodebooking, $anggota){
+	
+		$title = "Booking Jadwal Order";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota
+		);
+		
+		$email = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_anggota_only_admin', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_anggota_only_admin_success($tindakterapi, $jadwalbooking, $kodebooking, $anggota){
+	
+		$title = "Booking Jadwal Order Success";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota
+		);
+		
+		$email = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_anggota_only_admin_success', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	
+	}
+	
+	public function email_resi_booking_multiple_admin($tindakterapi, $jadwalbooking, $kodebooking, $anggota, $fullname){
+	
+		$title = "Booking Jadwal Order";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota,
+			'fullname' => $fullname
+		);
+		
+		$email = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_multiple_admin', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	}
+	
+	public function email_resi_booking_multiple_admin_success($tindakterapi, $jadwalbooking, $kodebooking, $anggota, $fullname){
+	
+		$title = "Booking Jadwal Order Success";
+	
+		$dataArray = array(
+			'tindakterapi' => $tindakterapi,
+			'jadwalbooking' => $jadwalbooking,
+			'kodebooking' => $kodebooking,
+			'anggota' => $anggota,
+			'fullname'	=> $fullname
+		);
+		
+		$email = $this->getEmailAdministrator();
+		
+		$emailKonten = $this->load->view('template/_email_resi_booking_multiple_admin_success', $dataArray, TRUE);
+		
+		$this->printOrSendEmail($email, $title, $emailKonten);
+		
+		
+		return true;
+	
+	}
+	
 	
 	public function email_register_success($email, $fullname, $username, $nohp, $pass, $token){
 		

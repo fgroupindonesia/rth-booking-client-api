@@ -19,7 +19,7 @@ class UserModel extends CI_Model {
 		return $stat;
 	}
 	
-	public function add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propicIn, $tokenIn){
+	public function add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propicIn, $tokenIn, $marriedIn){
 		
 		
 		
@@ -36,6 +36,7 @@ class UserModel extends CI_Model {
 	
 		$data = array(
 			'username' 	=> $username,
+			'married'	=> $marriedIn,
 			'status'	=> $statusUserNa,
 			'home_address' 		=> $home_address,
 			'contact' 	=> $contact,

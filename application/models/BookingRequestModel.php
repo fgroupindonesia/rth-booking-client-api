@@ -22,6 +22,7 @@ class BookingRequestModel extends CI_Model {
 	}
 	
 	private function getFullname($fromUsername){
+		$foundData = "";
 		
 		
 		$multiParam1 = array(
@@ -31,14 +32,57 @@ class BookingRequestModel extends CI_Model {
 		$this->db->where($multiParam1);		
 		$query = $this->db->get('rth_users');
 		
-		$foundData = "";
-		
 		foreach ($query->result() as $row)
 		{
 			$foundData =	$row->full_name;
+			break;
 		}
 		
 		return $foundData;
+		
+	}
+	
+	public function getSpecificBy($col, $val){
+		
+		$endResult = $this->generateRespond('invalid');
+		
+		$multiParam1 = array(
+			$col => $val
+		);
+		
+		
+		$this->db->where($multiParam1);		
+		$query = $this->db->get('rth_booking_request');
+		
+		$foundData = false;
+		
+		foreach ($query->result() as $row)
+		{
+			
+			$foundData = true;
+			
+			$dataTr = $this->clearStrip( $row->treatment );
+			
+			$data = array(
+				'id' => $row->id,
+				'code' => $row->code,
+				'gender' => $row->gender,
+				'treatment' => $dataTr,
+				'schedule_date' => $row->schedule_date,
+				'username' => $row->username,
+				'full_name' => $this->getFullname($row->username),
+				'status' => $row->status,
+				'created_date' => $row->created_date
+			);
+			
+			$endResult['multi_data'] = $data;
+		}
+		
+		if($foundData){
+			$endResult['status'] = 'valid';
+		}
+		
+		return $endResult;
 		
 	}
 	
@@ -67,6 +111,7 @@ class BookingRequestModel extends CI_Model {
 				'id' => $row->id,
 				'code' => $row->code,
 				'treatment' => $dataTr,
+				'gender' => $row->gender,
 				'schedule_date' => $row->schedule_date,
 				'username' => $row->username,
 				'full_name' => $this->getFullname($row->username),

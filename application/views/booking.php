@@ -416,10 +416,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div data-role="fieldcontain">
 	<label for="peserta_baru_nikah">Status Nikah:</label>
 	<select name="peserta_baru_nikah" id="peserta_baru_nikah" >
-		<option value="single">belum menikah</option>
-		<option value="married">bersuami-istri</option>
-		<option value="divorce">bercerai</option>
-		<option value="almarhum">ditinggal wafat</option>
+		<option value="0">belum menikah</option>
+		<option value="1">bersuami-istri</option>
+		<option value="2">bercerai</option>
+		<option value="3">ditinggal wafat</option>
 	</select>
 	</div>
 	

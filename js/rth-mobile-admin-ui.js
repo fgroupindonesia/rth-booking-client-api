@@ -13,6 +13,7 @@ $(document).ready(function(){
 	
 	formLoginValidation();
 	formProfilValidation();
+	formSettingsValidation();
 	
 	registerEventClick();
 	
@@ -223,6 +224,35 @@ function grabDataScheduleServer(){
 	
 }
 
+function grabDataSettingsServer(){
+	
+	$.ajax({
+                type: 'POST',
+                url: '/settings/all',
+                dataType: 'json',
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						
+						extractDataToSettings(result);
+						
+					}
+					
+					console.log(JSON.stringify(result));
+					
+					tampilin('settings-detail-data');
+					sembunyi('settings-detail-loading');
+					
+                },
+                error : function(error) {
+					$.mobile.changePage("#page-menu-aksi");
+                }
+    });
+	
+}
+
 function updateDataScheduleServer(backToCalendar){
 	
 	$.ajax({
@@ -380,6 +410,49 @@ function formProfilValidation(){
 	
 }
 
+function formSettingsValidation(){
+	
+	//alert('sedang validating...');
+	
+	// this is for form-login
+	 $("#form-settings").validate({
+        rules: { },
+        messages: { },
+		submitHandler: function(form) {
+			
+			// remake the data from the form-profil
+			kiriman = remakeDataFormProfil();
+			
+			$.ajax({
+                type: 'POST',
+                url: '/settings/update',
+                dataType: 'json',
+				data: $('#form-settings').serialize(),
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						$.mobile.changePage("#page-menu-aksi");
+						
+					}
+					
+					console.log('dapet na ' + JSON.stringify(result));
+                    
+                },
+                error : function(error) {
+					console.log(error);
+					//alert(error);
+					$.mobile.changePage("#page-error-server");
+                }
+            });
+			
+		}
+    });
+	
+	
+}
+
 function switchClass(jam, tongol3Kolom){
 	
 	if(tongol3Kolom == false){
@@ -504,6 +577,12 @@ $(document).on("click", ".pasien-fullname a" , function() {
 			 
 			 
  });
+
+$("#link-settings").bind("click", function() {
+
+	grabDataSettingsServer();
+	
+});	
 
 	
 $("#link-kembali-kalendar").bind("click", function() {
@@ -1081,6 +1160,23 @@ function extractDataToDetail(dataCome){
 		
 	}
 	
+	
+}
+
+function extractDataToSettings(dataCome){
+	
+	var n = JSON.stringify(dataCome);
+    var data = JSON.parse(n);
+	
+	var isiNa = data.multi_data;
+	
+	var opsi = 'value=' + isiNa.auto_accept;
+	$('#auto_accept option['+opsi+']').prop('selected', true);
+	$('#auto_accept').selectmenu('refresh', true);
+	
+	var opsi2 = 'value=' + isiNa.holiday;
+	$('#holiday option['+opsi2+']').prop('selected', true);
+	$('#holiday').selectmenu('refresh', true);
 	
 }
 

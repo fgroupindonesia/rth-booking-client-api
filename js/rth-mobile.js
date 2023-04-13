@@ -945,7 +945,7 @@ function collectBookingOrder(jamMasuk){
 	var schedDate = $('#pilih-tanggal').val();
 	
 	jadwal_sembunyi = $('#pilih-tanggal option:selected').text();
-	jadwal_sembunyi += " " + jamMasuk;
+	jadwal_sembunyi += jamMasuk;
 	
 	schedDate += " " + jamMasuk;
 	
@@ -978,17 +978,59 @@ function collectBookingOrder(jamMasuk){
 		treatment: objTreatment,
 		schedule_date : schedDate,
 		human_date : jadwal_sembunyi,
-		gender: genderNa
+		gender: genderNa,
+		anggota : "",
+		booking_mode : modeOrangBerangkat
 	};
 	
-	console.log('kirimkan ' + postData);
+	console.log('kirimkan ' + JSON.stringify(postData));
+	
+	// preparing for email notification @server
+	if(modeOrangBerangkat == 'anggota-saja'){
+		
+		postData.anggota = createNameListAnggota(-1);
+		
+	}else if(modeOrangBerangkat == 'saya-bersama-anggota'){
+		
+		postData.anggota = createNameListAnggota(0);
+		
+	}
+	
+	// stored in a different variable
+	kiriman = postData;
 	
 	postDataBookingRequest(postData, codeNa, jadwal_sembunyi );
 	
 	
 	}
 	
+	// kiriman will be sent here
+	postCheckingBookingStatusServer();
 	
+	
+}
+
+function createNameListAnggota(skipNumber){
+	
+	var namina = '';
+	// the skipped number is the index position
+	// for the name to be skipped
+	// for this example, the first entry is the current user
+
+		for(i=0; i<namaAnggotaTerapiList.length; i++){
+			
+			if(i!=skipNumber){
+			
+			if(namina==''){
+			namina += namaAnggotaTerapiList[i].full_name;
+			}else{
+				namina += "," + namaAnggotaTerapiList[i].full_name;
+			}
+			
+			}
+		}
+	
+	return namina;
 }
 
 function extractDataProfil(dataCome){
@@ -1478,6 +1520,73 @@ function postDataBookingRequest(dataObject, codeNa, tglNa ){
 	
 }
 
+function postBookingNotification(approvedOne){
+	
+	
+	
+	// modify the data to be passed
+	if(approvedOne == false){
+		kiriman.approval = 'pending';
+	}else{
+		kiriman.approval = 'approved';
+	}
+	
+		$.ajax({
+                type: 'POST',
+				dataType: 'json',
+                url: '/booking/send/notification',
+				data : kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+					}
+					
+					console.log(' notification done!'  + JSON.stringify(result));
+					
+                },
+                error : function(error) {
+					console.log(JSON.stringify(error));
+					//$.mobile.changePage("#page-booking-failed");
+                }
+            });
+	
+}
+
+function postCheckingBookingStatusServer(){
+	
+		$.ajax({
+                type: 'POST',
+				dataType: 'json',
+                url: '/booking/check/acceptance',
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						// because acceptance is okay
+						// so we request email notification 
+						// for success booking
+						postBookingNotification(true);
+						
+					}else{
+						
+						// because acceptance are not okay
+						// so we request email notification
+						// for pending currently
+						postBookingNotification(false);
+						
+					}
+					
+                },
+                error : function(error) {
+					console.log(JSON.stringify(error));
+					$.mobile.changePage("#page-booking-failed");
+                }
+            });
+	
+}
+
 function checkValidity(dataCome){
 	
 	var val = false;
@@ -1640,6 +1749,7 @@ function remakeDataFormPesertaBaru(untukAnggota){
 		kiriman.contact = $('#peserta_baru_nomorhp').val();
 		kiriman.gender = $('#peserta_baru_kelamin').val();
 		kiriman.full_name = $('#peserta_baru_nama').val();
+		kiriman.married	= $('#peserta_baru_nikah').val();
 		
 		kiriman.keluhan = $('#kesehatan_umum_keluhan').val();
 		kiriman.merokok = $('#kesehatan_umum_merokok').val();
@@ -1866,6 +1976,8 @@ function konversiAsHuman(computerDate){
 	
 }
 
+
+
 function clickEventDetailBooking(){
 	
 		 $(document).on("click", ".treatment-code a" , function() {
@@ -1896,16 +2008,26 @@ function clickEventCancelBooking(){
 		// get the code of that booking
 		// and post to server change the status
 		 var codePilihan =  $(this).parent().parent().find('.treatment-code').text();
+		 var idNa = $(this).parent().parent().find('.treatment-code').find('a').attr('data-id');
 		 var tgl =  $(this).parent().parent().find('.treatment-schedule-date').text();
+		 // this tanggal is computer format 
+		 // 2023-04-13 08:00:00
+		 var dataMentah = tgl.split(" ");
+		 var dateNa = dataMentah[0];
+		 var hourNa = dataMentah[1].substring(0,5);
+		 
 		 var namaP = $('#txt-fullname').text();
 		
 			tgl = konversiAsHuman(tgl);
 		
 		kiriman = {
 			code : codePilihan,
+			id : idNa,
 			status : 'cancelled',
 			fullname : namaP,
-			human_date : tgl
+			human_date : tgl,
+			date : dateNa,
+			hour : hourNa
 		};
 	 
 		if(codePilihan !== undefined){

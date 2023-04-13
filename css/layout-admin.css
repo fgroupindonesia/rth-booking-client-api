@@ -3,6 +3,10 @@
 	display:none;
 }
 
+#settings-detail-data {
+	display:none;
+}
+
 .next-button, .today-button, .prev-button, .auto-fill-button{
 	border-radius: 5px;
 	border-style: groove !important;

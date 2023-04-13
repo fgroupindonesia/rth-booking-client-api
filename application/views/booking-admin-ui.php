@@ -151,7 +151,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<p>Klik salah satu pilihan untuk mengatur data </p>
 <a href="#page-management-pasien" id="link-management-pasien" data-inline="true" data-role="button">Seluruh Pasien</a>	
 <a href="#page-management-booking" data-inline="true" data-role="button">Seluruh Booking</a>
-
+<a href="#page-settings" id="link-settings" data-inline="true" data-role="button">Settings</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
@@ -370,6 +370,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
+
+<section id="page-settings" data-role="page">
+<header data-role="header" data-position="fixed"><h1>System Settings</h1></header>
+<div  class="content" data-role="content" >
+	
+	<div id="settings-detail-loading"><img alt="loading image" src="/images/loading.gif" /><span>Loading...
+	</span></div>
+	
+	<div id="settings-detail-data">
+	<form id="form-settings" method="post" data-ajax="false" >
+
+	<div data-role="fieldcontain">
+		<label for="auto_accept">Auto Accept Booking Request:</label>
+		<select id="auto_accept" name="auto_accept" >
+			<option value="1">Yes</option>
+			<option value="0">No</option>
+		</select>
+	</div>
+	
+	<div data-role="fieldcontain">
+		<label for="holiday">Holiday:</label>
+		<select id="holiday" name="holiday" >
+			<option value="1">Yes</option>
+			<option value="0">No</option>
+		</select>
+	</div>
+
+	<input id="tombol-settings-submit" data-inline="true" data-role="submit" type="submit" value="save">
+		
+	</form>
+	</div>
+	
+	<a href="#page-menu-aksi" data-inline="true" data-role="button">kembali &#60;&#60;</a>
+	
+</div>
+<footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
+</section>
+
 
 <section id="page-user-detail" data-role="page">
 <header data-role="header" data-position="fixed"><h1>User Detail</h1></header>

@@ -63,6 +63,11 @@ class User extends CI_Controller {
 		// for activation later
 		$token 			= $this->generateToken(25);
 		
+		$married 		= $this->input->post('married');
+		// MARRIED 0 is single,
+		// MARRIED 1 is married,
+		// MARRIED 2 is divorced,
+		// MARRIED 3 is dead
 		
 		$home_address 	= $this->input->post('home_address');
 		$contact 		= $this->input->post('contact');
@@ -73,6 +78,7 @@ class User extends CI_Controller {
 		// MEMBERSHIP 0 is patient, MEMBERSHIP 1 is VIP, 
 		// MEMBERSHIP 2 is admin
 		$gender			=  $this->input->post('gender');
+		// GENDER 0 is female, 1 is male
 		
 		$propic			= 'default.png';
 		
@@ -86,7 +92,7 @@ class User extends CI_Controller {
 		 $propic = $res;
 	 }
 	 
-		 $endRespond = $this->UserModel->add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propic, $token);
+		 $endRespond = $this->UserModel->add($username, $pass, $email, $home_address, $contact, $full_name, $alive, $membership, $gender, $propic, $token, $married);
 		 
 		 $rel_conn = $this->input->post('rel_connection');
 		 $username_incharge = $this->input->post('username_incharge');
@@ -123,13 +129,65 @@ class User extends CI_Controller {
 			 // sending Email Notification
 			$this->EmailModel->email_register_success($email, $full_name, $username, $contact, $pass, $token);
 			
-			// we dont check any further here
+			// we dont check any further here except tell the admin
+			$gender_indo = 'wanita';
+			$married_indo = 'single';
+			
+			if($gender == 1){
+			$gender_indo = 'lelaki';
+			} 
+			
+			if($married == 1){
+				$married_indo = 'bersuami-istri';
+			}else if($married == 2){
+				$married_indo = 'bercerai';
+			}else if($married == 3){
+				$married_indo = 'ditinggal wafat';
+			}
+			
+			$dataUmum = array(
+				'merokok' 	=> $this->yesNoValue($smoking),
+				'inap'		=> $this->yesNoValue($rawat_inap),
+				'bius'		=> $this->yesNoValue($obat_bius),
+				'tbc'		=> $this->yesNoValue($tbc),
+				'kanker'	=> $this->yesNoValue($kanker),
+				'jantung'	=> $this->yesNoValue($jantung),
+				'stroke'	=> $this->yesNoValue($stroke),
+				'anjuran'	=> $this->yesNoValue($anjurandok)
+			);
+			
+			$dataKhusus = array(
+				'ritual'	=> $this->yesNoValue($ritual),
+				'td'		=> $this->yesNoValue($tenaga),
+				'mimpi'		=> $this->yesNoValue($mimpi),
+				'paranormal'=> $this->yesNoValue($kunjungan),
+				'ghaib'		=> $this->yesNoValue($ghaib)
+			);
+			
+			
+			$createdDate = date('Y-m-d H:i:s');
+			
+			 // sending Email Notification for admin
+			$this->EmailModel->email_register_success_notif_admin($createdDate,
+			$full_name, $gender_indo, $married_indo, $contact, $home_address, $keluhan,
+			$dataUmum, $dataKhusus);
+			
 			
 		 }
 	 
 		
 		echo json_encode($endRespond);
 		
+	}
+	
+	private function yesNoValue($val){
+		$hasil = "tidak";
+		
+		if($val == 1){
+			$hasil = "ya";
+		}
+		
+		return $hasil;
 	}
 	
 	// this is for CLIENT Reset Password Step-2 : clicking GET URL

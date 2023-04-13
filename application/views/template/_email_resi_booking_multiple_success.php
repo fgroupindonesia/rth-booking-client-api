@@ -1,15 +1,18 @@
 -----------------------------------------------------------
-Resi Booking Jadwal
+Booking Jadwal Berhasil
 -----------------------------------------------------------
 
-Walhamdulillah,
-Ini merupakan Jadwal Anggota / Kerabat Anda Saja:
+Walhamdulillah, Booking berhasil!
+Treatment terapi Anda & Anggota:
 
 Kode Booking	: <?=$kodebooking;?> 
-Nama Pasien 	: <?=$anggota;?> 
+Nama Pasien 	: <?=$fullname;?>
+Beserta Anggota	: <?=$anggota;?>
 Booking Jadwal 	: <?=$jadwalbooking;?> 
 Tindak Terapi 	:  
 <?=$tindakterapi;?> 
+
+Status Booking 	: BERHASIL.
 
 Ingat untuk tidak melakukan makan dalam waktu dekat (60 menit)sebelum terapi demi kemudahan prosesi tindak terapi saat berlangsung.
 
