@@ -9,6 +9,10 @@
 	color: red;
 }
 
+#peserta-baru-loading{
+	display:none;
+}
+
 label.error {
 		color: red;
 		font-size: 16px;
@@ -62,6 +66,13 @@ label.error {
 	background-size: 18px 18px;
 	background-position: left;
 	padding-left: 20px;;
+}
+
+.warning {
+	background: url('/images/error_28.png') no-repeat 5px center;
+	background-size: 18px 18px;
+	background-position: right;
+	
 }
 
 .tombol-booking{
@@ -141,6 +152,12 @@ label.error {
 
 .ui-icon-anggota-semua {
 	background-image: url("/images/group_28.png");
+	 background-repeat: no-repeat;
+  background-position: 0% 50%;
+}
+
+.ui-icon-keluar {
+	background-image: url("/images/logout.png");
 	 background-repeat: no-repeat;
   background-position: 0% 50%;
 }

@@ -9,8 +9,11 @@ class EmailModel extends CI_Model {
 		
 	}
 	
+	// set Debug to TRUE for showing the output text
 	private $debugModeHere = false;
-	private $disableEmailHere = false;
+	// turn this FALSE to make Email Works
+	// turn this TRUE to make Email stop working
+	private $disableEmailHere = true;
 	private $emailAdministrator = "rumahterapiherbalbandung@gmail.com";
 	
 	// DEBUGMODE TRUE is so PRINTOUT the email content but NO SENDING
@@ -521,7 +524,7 @@ class EmailModel extends CI_Model {
 	public function sendEmailActivation($dest, $judul, $htmlkonten){
 		
 		//valid sampe 
-		
+		/*
 		$config = array(
 			'protocol' => 'smtp', // 'mail', 'sendmail', or 'smtp'
 			'smtp_host' => 'ssl://smtp.elasticemail.com', 
@@ -540,7 +543,47 @@ class EmailModel extends CI_Model {
 		$this->email->to($dest);
 		$this->email->subject($judul);
 		$this->email->message($htmlkonten);
-		$this->email->send();
+		$this->email->send();*/
+		
+		$this->sendEmailNewer($dest, $judul, $htmlkonten);
+		
+		// newer code for API Sending 0859B5B101701837610717411AD3002B86F91A55660E4265A07782A6151579014DEAB978B5B44D53C6403C20A466D073
+	}
+	
+	public function sendEmailNewer($dest, $judul, $htmlkonten){
+		
+		$keyAPINum = "0859B5B101701837610717411AD3002B86F91A55660E4265A07782A6151579014DEAB978B5B44D53C6403C20A466D073";
+		
+		$url = 'https://api.elasticemail.com/v2/email/send';
+
+		try{
+				$post = array('from' => 'admin@rumahterapiherbal.web.id',
+				'fromName' => 'RTH - Rumah Terapi Herbal',
+				'apikey' => $keyAPINum,
+				'subject' => $judul,
+				'to' => $dest,
+				'bodyHtml' => $htmlkonten,
+				'isTransactional' => false);
+				
+				$ch = curl_init();
+				curl_setopt_array($ch, array(
+					CURLOPT_URL => $url,
+					CURLOPT_POST => true,
+					CURLOPT_POSTFIELDS => $post,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_HEADER => false,
+					CURLOPT_SSL_VERIFYPEER => false
+				));
+				
+				$result=curl_exec ($ch);
+				curl_close ($ch);
+				
+				//echo $result;	
+		}
+		catch(Exception $ex){
+			echo $ex->getMessage();
+		}
+		
 	}
 	
 	

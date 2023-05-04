@@ -1,20 +1,20 @@
------------------------------------------------------------
-Booking Jadwal Order Success
------------------------------------------------------------
-
-Booking Jadwal Order dengan detail Anggota Kerabat peserta sebagai berikut :
-
-Kode Booking	: <?=$kodebooking;?> 
-Nama Pasien 	: <?=$anggota;?> 
-Booking Jadwal 	: <?=$jadwalbooking;?> 
-Tindak Terapi 	:  
-<?=$tindakterapi;?> 
-
-Sudah dapat ditindaklanjuti sesuai jadwal tersebut demi kemudahan secara menyeluruh.
-
-
-Automatic Support System
-RTH - Rumah Terapi Herbal.
+<hr>
+<h1>Booking Jadwal Order Success</h1>
+<hr>
+<br/>
+Booking Jadwal Order dengan detail Anggota Kerabat peserta sebagai berikut : <br/>
+<br/>
+Kode Booking	: <?=$kodebooking;?> <br/> 
+Nama Pasien 	: <?=$anggota;?> <br/>
+Booking Jadwal 	: <?=$jadwalbooking;?> <br/>
+Tindak Terapi 	:  <br/>
+<?=$tindakterapi;?> <br/>
+<br/>
+Sudah dapat ditindaklanjuti sesuai jadwal tersebut demi kemudahan secara menyeluruh. <br/>
+<br/>
+<br/>
+Automatic Support System <br/>
+RTH - Rumah Terapi Herbal. <br/>
 
 <?php
 	$this->load->view('template/_footer');

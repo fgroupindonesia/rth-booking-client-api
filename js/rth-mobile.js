@@ -5,13 +5,16 @@ var gender_sembunyi = "";
 var month_year_sembunyi = "";
 var hubungan_sembunyi = "";
 var tanggal_sembunyi = "";
+
 var modePendaftaran = "";
 var kiriman = "";
+
 var pakaiEmail = true;
 var anggotaNa = false;
 var jumlahAnggota = 0;
 var namaAnggotaTerapiList = [];
 var antrianBooking = 0;
+
 var modeOrangBerangkat = ""; 
 var jumlahJamTersedia = 5;
 var jumlahJamTerpakai = 0;
@@ -44,6 +47,8 @@ $(document).ready(function(){
 	clickEventPilihAnggotaSelesai();
 	clickEventDetailBooking();
 	
+	typeEventEmailAnggotaBaru();
+	
 	setTimeout(nextPage1, 3000);
 	
 	// false because not for anggota
@@ -59,6 +64,32 @@ $(document).ready(function(){
 	pilihJam();
 	
 });
+
+function typeEventEmailAnggotaBaru(){
+	
+	$('#peserta_baru_email').on('input', function() {
+    
+		var ketikan = $(this).val();
+		
+		if(validateEmail(ketikan)){
+			// check di server apakah sudah terdaftar?
+			
+			kiriman = {};
+			kiriman.email = ketikan;
+			
+			requestEmailCheckingServer();
+		}else if(ketikan == ''){
+			showEmailWarning(false);
+		}
+	
+	});
+	
+}
+
+function validateEmail(email) {
+  var re = /\S+@\S+\.\S+/;
+  return re.test(email);
+}
 
 function clearFormRegistrasi(){
 	
@@ -371,6 +402,10 @@ function clickEventDaftarkanAnggota(){
 	
 }
 
+
+
+
+
 function clickEventDaftarkanTunggal(){
 	//alert('lkii');
 	
@@ -396,6 +431,7 @@ function refreshDataProfil(){
 			username : username_sembunyi
 	};
 	
+	//console.log('check profil ' + username_sembunyi);
 	
 	//alert('akan kirim '  + JSON.stringify(kiriman));
 	
@@ -405,6 +441,14 @@ function refreshDataProfil(){
 }
 
 function refreshDataPilihanBooking(){
+	
+	// reset any counter
+	jumlahJamTerpakai = 0;
+	kosonginDataPilihanBookingJam(8);
+	kosonginDataPilihanBookingJam(10);
+	kosonginDataPilihanBookingJam(13);
+	kosonginDataPilihanBookingJam(16);
+	kosonginDataPilihanBookingJam(20);
 	
 	// hide semua tombol, warning-booking
 	// lalu munculkan loading
@@ -434,10 +478,13 @@ function refreshDataTable(){
 	
 	// show the loading
 	tampilin('riwayat-loading');
-		
+	
+	
+	
 	// grab after 3 seconds
 	setTimeout(	grabDataServer, 3000);
 
+	
 	
 }
 
@@ -536,6 +583,20 @@ function tersedia(angka, stat){
 			}
 }
 
+function kosonginDataPilihanBookingJam(angka){
+	
+	var sel = '#jam'+ angka + ' .status';
+	var dicari = ".tombol-booking[data-jam='" + asJam(angka) + "']";
+	
+	$(sel).removeClass('red');
+	$(sel).removeClass('bold');
+	$(sel).text('');
+	
+	$(dicari).hide();
+	
+	
+}
+
 function opsiTerapiBersamaAnggota(tampilkan){
 	
 	$('#pilih_anggota_siapa').selectmenu();
@@ -595,7 +656,7 @@ function grabDataJumlahAnggotaServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(659, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -647,7 +708,7 @@ function grabDataBookingDetailServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(711, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -674,11 +735,11 @@ function grabDataProfilServer(){
 					
 					sembunyi('profil-loading');
 					
-					//console.log(result);
+					//console.log('hasilna ' + result);
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(742, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -714,7 +775,7 @@ function grabDataSchedulesServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(778, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -748,7 +809,7 @@ function grabDataServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(812, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -783,8 +844,49 @@ function grabDataAnggotaServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(847, error);
 					$.mobile.changePage("#page-error-server");
+                }
+            });
+	
+}
+
+function showEmailWarning(kemunculan){
+	
+	if(kemunculan){
+		$('label[for="peserta_baru_email"]').addClass('warning');
+	}else{
+		$('label[for="peserta_baru_email"]').removeClass('warning');
+	}
+	
+}
+
+function requestEmailCheckingServer(){
+	
+	// request data from server
+	$.ajax({
+                type: 'POST',
+                url: '/user/registration/check',
+                dataType: 'json',
+                data: kiriman,
+                success: function(result) {
+					
+					// check validity
+					if(checkValidity(result)){
+						
+						// show warning
+						showEmailWarning(true);
+					}else{
+						
+						// hide warning
+						showEmailWarning(false);
+						
+					}
+					//console.log(result);
+					
+                },
+                error : function(error) {
+					showError(889, error);
                 }
             });
 	
@@ -814,7 +916,7 @@ function grabDataAnggotaTerapiServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(919, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -853,7 +955,7 @@ function deleteDataAnggotaServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(958, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -891,7 +993,7 @@ function updateDataServer(){
 					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(996, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -920,6 +1022,8 @@ function pilihJam(){
 		var jam =	$(this).attr('data-jam');
 		collectBookingOrder(jam);
 		
+		
+		
 	});
 	
 }
@@ -932,7 +1036,7 @@ function collectBookingOrder(jamMasuk){
 	var postData = {};
 	var codeNa =	generateRandomString(4) + "-" + generateRandomString(3);
 	
-	console.log('ada datanya ' + namaAnggotaTerapiList.length);
+	console.log('ada booking datanya ' + namaAnggotaTerapiList.length);
 	
 	for(i = 0; i < namaAnggotaTerapiList.length ; i++) {
 	
@@ -983,7 +1087,7 @@ function collectBookingOrder(jamMasuk){
 		booking_mode : modeOrangBerangkat
 	};
 	
-	console.log('kirimkan ' + JSON.stringify(postData));
+	console.log('data booking kirimkan ' + JSON.stringify(postData));
 	
 	// preparing for email notification @server
 	if(modeOrangBerangkat == 'anggota-saja'){
@@ -1008,6 +1112,7 @@ function collectBookingOrder(jamMasuk){
 	postCheckingBookingStatusServer();
 	
 	
+	
 }
 
 function createNameListAnggota(skipNumber){
@@ -1016,7 +1121,7 @@ function createNameListAnggota(skipNumber){
 	// the skipped number is the index position
 	// for the name to be skipped
 	// for this example, the first entry is the current user
-
+		var i=0;
 		for(i=0; i<namaAnggotaTerapiList.length; i++){
 			
 			if(i!=skipNumber){
@@ -1487,18 +1592,12 @@ function postDataBookingRequest(dataObject, codeNa, tglNa ){
 						// update the counter for last making whatsapp message
 						antrianBooking++;
 						
-						if(antrianBooking == namaAnggotaTerapiList.length){
-							// jika tlah mencapai angkanya
-							// maka kita create pesan whatsapp
-							tempObj = dataObject;
+						// jika tlah mencapai angkanya
+						// maka kita create pesan whatsapp
+						tempObj = dataObject;
 							
-							if(modeOrangBerangkat == 'saya-sendiri'){
-								setTimeout(visitWhatsappSendiri, 3000);
-							}else{ 
-								setTimeout(visitWhatsappBanyakan, 3000);
-							}
-						}
 						
+						// lastly update UI on client
 						
 						updateSuccess(codeNa, tglNa);
 						
@@ -1513,7 +1612,7 @@ function postDataBookingRequest(dataObject, codeNa, tglNa ){
                     
                 },
                 error : function(error) {
-					console.log(JSON.stringify(error));
+					showError(1615, error);
 					$.mobile.changePage("#page-booking-failed");
                 }
             });
@@ -1543,11 +1642,21 @@ function postBookingNotification(approvedOne){
 						
 					}
 					
-					console.log(' notification done!'  + JSON.stringify(result));
+					console.log('notification done! '  + JSON.stringify(result));
+					
+									
+					// once it's done 
+					// we reset the list
+					 refreshDataPilihanBooking();
+
+					// sending wa
+					console.log('mo kirim WA... ' + modeOrangBerangkat);
+					 
+					 sendWA();
 					
                 },
                 error : function(error) {
-					console.log(JSON.stringify(error));
+					showError(1657, error);
 					//$.mobile.changePage("#page-booking-failed");
                 }
             });
@@ -1568,7 +1677,7 @@ function postCheckingBookingStatusServer(){
 						// so we request email notification 
 						// for success booking
 						postBookingNotification(true);
-						
+							
 					}else{
 						
 						// because acceptance are not okay
@@ -1578,12 +1687,34 @@ function postCheckingBookingStatusServer(){
 						
 					}
 					
+					
+					
                 },
                 error : function(error) {
-					console.log(JSON.stringify(error));
+					showError(1693, error);
 					$.mobile.changePage("#page-booking-failed");
                 }
             });
+			
+			
+				
+	
+}
+
+function showError(line, json){
+	console.log("error at " + line + " for " + JSON.stringify(json));
+}
+
+function sendWA(){
+	
+	if(antrianBooking >= namaAnggotaTerapiList.length){
+							
+							if(modeOrangBerangkat == 'saya-sendiri'){
+								setTimeout(visitWhatsappSendiri, 6000);
+							}else{ 
+								setTimeout(visitWhatsappBanyakan, 6000);
+							}
+	}	
 	
 }
 
@@ -1641,8 +1772,7 @@ function formResetPassValidation(){
                     
                 },
                 error : function(error) {
-					console.log(error);
-					alert(error);
+					showError(1775, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -1714,8 +1844,7 @@ function formLoginValidation(){
                     
                 },
                 error : function(error) {
-					console.log(error);
-					alert(error);
+					showError(1847, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -1741,7 +1870,7 @@ function remakeDataFormPesertaBaru(untukAnggota){
 		kiriman.rel_connection = $('#peserta_baru_hubungan').val();
 		
 	}else{
-		kiriman.email = $('#peserta_baru_email').val();
+		kiriman.email = $('#peserta_baru_email').val().toLowerCase();
 		hubungan_sembunyi = "";
 	}
 	
@@ -1842,8 +1971,7 @@ function formProfilValidation(){
                     
                 },
                 error : function(error) {
-					console.log(error);
-					//alert(error);
+					showError(1974, error);
 					$.mobile.changePage("#page-error-server");
                 }
             });
@@ -1887,6 +2015,9 @@ function formRegistrationValidation(anggota){
         },
 		submitHandler: function(form) {
 			
+			tampilin('peserta-baru-loading');
+			sembunyi('form-registrasi');
+			
 			// take the form based on anggota or not?
 				kiriman = remakeDataFormPesertaBaru(anggotaNa);
 			
@@ -1915,10 +2046,17 @@ function formRegistrationValidation(anggota){
 					// clearup
 					clearFormRegistrasi();
 					
+					sembunyi('peserta-baru-loading');
+					tampilin('form-registrasi');
+					
                 },
                 error : function(error) {
-					console.log(error);
+					showError(2054, error);
 					$.mobile.changePage("#page-error-server");
+					
+					sembunyi('peserta-baru-loading');
+					tampilin('form-registrasi');
+					
                 }
             });
 			
@@ -2084,6 +2222,56 @@ function clickEventAwal(){
 		
 		
 	});
+	
+	$("#link-return-0").click(function() {
+		
+		setTimeout(nextPage1, 3000);
+		
+	});
+	
+	$("#link-batal-add-user").click(function() {
+		
+		// kalau sudah login maka 
+		// back to home
+		// kalau blm login
+		// back to page1
+		
+		if(username_sembunyi == ''){
+				$.mobile.changePage("#page1");
+		}else{
+			backToMenuAksi();
+		}
+		
+	});
+	
+	$("#link-logout").click(function() {
+		
+		 username_sembunyi = "";
+		 fullname_sembunyi = "";
+		 jadwal_sembunyi = "";
+		 gender_sembunyi = "";
+		 month_year_sembunyi = "";
+		 hubungan_sembunyi = "";
+		 tanggal_sembunyi = "";
+
+		 modePendaftaran = "";
+		 kiriman = "";
+
+		 pakaiEmail = true;
+		 anggotaNa = false;
+		 jumlahAnggota = 0;
+		 namaAnggotaTerapiList = [];
+		 antrianBooking = 0;
+
+		 modeOrangBerangkat = ""; 
+		 jumlahJamTersedia = 5;
+		 jumlahJamTerpakai = 0;
+		 
+		 $.mobile.changePage("#page1");
+		
+	});
+	
+	
 	
 }
 

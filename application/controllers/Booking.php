@@ -11,22 +11,35 @@ class Booking extends CI_Controller {
 		$this->load->model('EmailModel');
 		$this->load->model('UserModel');
 		
-		// turn this TRUE if the site is in text output 
-		$this->EmailModel->setDebugMode(false);
+		$this->nocache();
 		
-		// turn this TRUE if the site can SEND EMAIL
-		$this->EmailModel->setEmailMode(false);
-		
+	}
+	
+	private function nocache(){
+		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
 	}
 	
 	public function index()
 	{
-		$this->load->view('booking');
+		$myKey = "?v=" . rand(10,100);
+		$data = array(
+			'myKey' => $myKey
+		);
+		
+		$this->load->view('booking', $data);
 	}
 	
 	// this is Administrator Access
 	public function admin(){
-		$this->load->view('booking-admin-ui');
+		
+		$myKey = "?v=" . rand(10,100);
+		$data = array(
+			'myKey' => $myKey
+		);
+		
+		
+		$this->load->view('booking-admin-ui' , $data);
 	}
 	
 	private function escapedString($val){
@@ -156,6 +169,7 @@ class Booking extends CI_Controller {
 		
 	}
 	
+	// send by client from browser js
 	public function sendNotification(){
 		
 		$username 	= $this->input->post('username');
@@ -221,6 +235,13 @@ class Booking extends CI_Controller {
 			$this->EmailModel->email_resi_booking_multiple_admin_success($tindakterapi, $jadwalbooking, $kodebooking, $anggotaHumanNames, $fullname);
 			
 		}
+		
+		
+		// we always said it's done
+		$hasil = array(
+		'status' => 'valid'
+		);
+		echo json_encode($hasil);
 		
 	
 	}

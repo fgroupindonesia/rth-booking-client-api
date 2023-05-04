@@ -4,15 +4,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="id">
 <head>
 	<meta charset="utf-8">
+	
 	<title>Booking Jadwal Terapi - RTH - Rumah Terapi Herbal</title>
 	<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 	<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<script src="/js/jquery.mobile-1.4.5.min.js<?= $myKey; ?>"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.js"></script>
-	<script src="/js/moment.js"></script>
-	<script src="/js/rth-mobile.js"></script>
-	<link rel="stylesheet" href="/css/layout.css" />
+	<script src="/js/moment.js<?= $myKey; ?>"></script>
+	<script src="/js/rth-mobile.js<?= $myKey; ?>"></script>
+	<link rel="stylesheet" href="/css/layout.css<?= $myKey; ?>" />
 </head>
 <body>
 
@@ -33,8 +34,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<img alt="logo rth" src="/images/logo2.png"/> <br>
 	<h4>Pilih Menu</h4>
 	<ul data-role="listview">
-		<li><a id="link-peserta-baru-tunggal" >Untuk Peserta Baru</a></li>
-		<li><a id="peserta-lama-login" href="#page-peserta-lama-login">Untuk Peserta Lama</a></li>
+		<li><a id="link-peserta-baru-tunggal" >Baru Mau Daftar</a></li>
+		<li><a id="peserta-lama-login" href="#page-peserta-lama-login">Login Untuk Booking</a></li>
 		<li data-role="divider">-</li>
 		<li><a id="link-workshop" href="">Workshop</a></li>
 	</ul>
@@ -85,6 +86,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<a id="link-page-all-anggota" data-inline="true" data-role="button" data-icon="anggota-semua" >Semua Anggota</a>
 	
 	<a id="link-daftar-anggota" data-inline="true" data-role="button" data-icon="anggota-baru" >Daftarkan Anggota</a>
+	
+	<a id="link-logout" data-inline="true" data-role="button" data-icon="keluar" >Logout</a>
 	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
@@ -362,10 +365,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <header data-role="header" data-position="fixed" ><h1>Pendaftaran Peserta Baru</h1></header>
 <div  class="content" data-role="content" >
 	<h3>Formulir Peserta Baru</h3>
-	<img alt="form image" src="/images/write.png"/>
-	<p>Harap diisi dengan lengkap.</p>
 	
 	<form id="form-registrasi"  method="post" data-ajax="false" >
+	<img alt="form image" src="/images/write.png"/>
+	<p>Harap diisi dengan lengkap.</p>
 	
 	<div data-role="fieldcontain" id="hubungan-peserta">
 	<label for="peserta_baru_hubungan">Hubungan Dengan Anda:</label>
@@ -526,6 +529,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 	<input type="button" id="tombol-kesehatan-khusus" value="isi data kesehatan khusus" />
 	
+	
 	<div id="data-kesehatan-khusus">
 	
 		<h4>Data Kesehatan Khusus</h4>
@@ -578,8 +582,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	
 	</div>
 
+	<a href="#" id="link-batal-add-user" data-inline="true" data-role="button">Kembali &#60;&#60;</a>
 	
 	</form>
+	
+	<div id="peserta-baru-loading"><img alt="loading image" src="/images/loading.gif" /><span>Saving...
+	</span></div>
+	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
@@ -674,7 +683,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<img alt="error image" src="/images/error.png"/>
 	<p>Innalillahi wa innailaihi roji'un, server sedang sibuk! </p>
 	<p>Cobalah <strong> lagi kemari dalam 30 menit setelah ini</strong> untuk dapat melanjutkan akses booking jadwal kembali!</p>
-	<a href="#page0" data-inline="true" data-role="button">Bismillah</a>
+	<a href="#page0" id="link-return-0" data-inline="true" data-role="button">Bismillah</a>
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>
 </section>
@@ -721,7 +730,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<h3>Jadwal Sukses di-booking!</h3>
 	<img alt="success image" src="/images/success.png"/>
 	<p>Walhamdulillah, jadwal booking anda berhasil! </p>
-	<p>Kode Booking : <strong id="booking-success-code">xxxx</strong> dengan Jadwal anda :<strong id="booking-success-date" > xxxx</strong> </p>
+	<p>Kode Booking : <strong id="booking-success-code">xxxx</strong> dengan Jadwal anda : <strong id="booking-success-date" > xxxx</strong> </p><br/>
+	<div><center><label>loading...</label>
+	<img src="/images/loading.gif" />
+	</center></div>
 	
 </div>
 <footer data-role="footer" data-position="fixed"><h1>RTH - Rumah Terapi Herbal </h1></footer>

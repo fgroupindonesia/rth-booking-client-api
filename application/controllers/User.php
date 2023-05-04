@@ -14,8 +14,14 @@ class User extends CI_Controller {
 		// turn this TRUE if the site is in text output 
 		$this->EmailModel->setDebugMode(false);
 		
-		// turn this TRUE if the site can SEND EMAIL
-		$this->EmailModel->setEmailMode(false);
+		
+		$this->nocache();
+		
+	}
+	
+	private function nocache(){
+		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
 	}
 	
 	public function test(){
@@ -356,6 +362,12 @@ class User extends CI_Controller {
 		$gender 	= $this->input->post('gender');
 		$member 	= $this->input->post('membership');
 		
+		if($username == 'admin'){
+			// if its admin 
+			// it will always as ADMIN privilledge 2
+			$member = 2;
+		}
+		
 		if(!isset($status)){
 			// given for default
 			$status = 'active';
@@ -420,14 +432,14 @@ class User extends CI_Controller {
 		$id 	= $this->input->post('id');
 		$us 	= $this->input->post('username');
 		
-		$dataUsed = null;
 		
-		if(isset($id)){
-		$dataUsed = $this->UserModel->getProfile($id);
-		}
+		$dataUsed = $this->UserModel->getProfileBy('id', $id);
+		
 		// try once more
-		if($dataUsed['status'] == 'invalid' || isset($us)){
+		if(isset($us)){
+			
 			$dataUsed = $this->UserModel->getProfileBy('username', $us);
+			
 		}
 		
 		echo json_encode($dataUsed);
@@ -473,6 +485,14 @@ class User extends CI_Controller {
 		
 	}
 	
-	
+	public function isAlreadyRegistered(){
+		
+		$emailna = $this->input->post('email');
+		
+		$endRespond = $this->UserModel->emailExist($emailna);
+		
+		echo json_encode($endRespond);
+		
+	}
 	
 }

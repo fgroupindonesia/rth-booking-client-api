@@ -6,6 +6,14 @@ class Schedule extends CI_Controller {
 	function __construct() {
 		parent::__construct();
 		$this->load->model('ScheduleModel');
+	
+		$this->nocache();
+		
+	}
+	
+	private function nocache(){
+		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
 	}
 	
 	public function test(){

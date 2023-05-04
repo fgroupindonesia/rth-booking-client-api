@@ -8,6 +8,13 @@ class Settings extends CI_Controller {
 		parent::__construct();
 		$this->load->model('SettingsModel');
 		
+		$this->nocache();
+		
+	}
+	
+	private function nocache(){
+		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
 	}
 	
 	public function update(){

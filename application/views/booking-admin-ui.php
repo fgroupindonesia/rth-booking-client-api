@@ -4,19 +4,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="id">
 <head>
 	<meta charset="utf-8">
+	
 	<title>Booking Jadwal Terapi - RTH - Rumah Terapi Herbal</title>
 	<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 	<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<script src="/js/jquery.mobile-1.4.5.min.js<?= $myKey; ?>"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.js"></script>
-	<script src="/js/moment.js"></script>
-	<script src="/js/calendar.js"></script>
-	<script src="/js/rth-mobile-admin-ui.js"></script>
-	<link rel="stylesheet" href="/css/layout.css" />
-	<link rel="stylesheet" href="/css/layout-admin.css" />
-	<link rel="stylesheet" href="/css/calendar-theme.css" />
-	<link rel="stylesheet" href="/css/calendar-style.css" />
+	<script src="/js/moment.js<?= $myKey; ?>"></script>
+	<script src="/js/calendar.js<?= $myKey; ?>"></script>
+	<script src="/js/rth-mobile-admin-ui.js<?= $myKey; ?>"></script>
+	<link rel="stylesheet" href="/css/layout.css<?= $myKey; ?>" />
+	<link rel="stylesheet" href="/css/layout-admin.css<?= $myKey; ?>" />
+	<link rel="stylesheet" href="/css/calendar-theme.css<?= $myKey; ?>" />
+	<link rel="stylesheet" href="/css/calendar-style.css<?= $myKey; ?>" />
 
 
 </head>

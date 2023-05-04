@@ -8,6 +8,13 @@ class Family extends CI_Controller {
 		$this->load->model('FamilyUserModel');
 		$this->load->model('HealthModel');
 		
+		$this->nocache();
+		
+	}
+	
+	private function nocache(){
+		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
 	}
 	
 	public function index()

@@ -55,6 +55,7 @@ $route['translate_uri_dashes'] = FALSE;
 $route['booking/check/acceptance'] = 'Booking/checkAcceptance';
 $route['booking/send/notification'] = 'Booking/sendNotification';
 $route['user/test'] = 'User/test';
+$route['user/registration/check'] = 'User/isAlreadyRegistered';
 $route['user/activate'] = 'User/aktifasi';
 $route['user/activate/now'] = 'User/directaktifasi';
 $route['user/disactivate/now'] = 'User/directnonaktifasi';
