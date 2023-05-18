@@ -20,7 +20,7 @@ Resources
 
 -  `Web <https://rumahterapiherbal.web.id>`_
 -  `Facebook <https://facebook.com/rumahterapiherbal>`_
-
+-  `Web Portal <https://rumahterapiherbal.web.id/p/booking.html>`_
 
 ***************
 Acknowledgement
